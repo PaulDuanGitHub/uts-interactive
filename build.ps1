@@ -1,2 +1,3 @@
 npm run build2;
-mv build docs
+rm docs;
+mv build docs;

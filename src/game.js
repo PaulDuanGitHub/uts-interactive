@@ -24,7 +24,7 @@ export class MyComponent extends Component {
   state = {
     onGround:true,
     joined: false,
-    socket: io.connect(isSocket? "https://api.paulduan.tk/" : "http://127.0.0.1:8000/", isSocket ? {path :'/uts/socket.io'} : {}),
+    socket: io.connect(isSocket? "https://api.paulduan.tk/" : "http://127.0.0.1:8000/", isSocket ? {path :'/uts-interactive/socket.io'} : {}),
     player:Matter.Bodies.rectangle(200, 200, 80, 80, {inertia: Infinity}),
     other_player: {}
   }
