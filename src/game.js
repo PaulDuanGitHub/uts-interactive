@@ -24,7 +24,7 @@ export class MyComponent extends Component {
   state = {
     onGround:true,
     joined: false,
-    socket: io.connect(isSocket? "https://api.paulduan.tk/" : "http://127.0.0.1:8000/", isSocket ? {path :'/uts-interactive/socket.io'} : {}),
+    socket: io.connect(isSocket? "https://api.paulduan.tk/" : "http://127.0.0.1:8888/", isSocket ? {path :'/uts-interactive/socket.io'} : {}),
     player:Matter.Bodies.rectangle(200, 200, 80, 80, {inertia: Infinity}),
     other_player: {}
   }
@@ -47,9 +47,10 @@ export class MyComponent extends Component {
               key.press();
             }
           }else {
-            key.interval = setInterval(() => {
-              key.press();
-            });
+            // key.interval = setInterval(() => {
+            //   key.press();
+            // });
+            key.press();
           }
         }
         key.isDown = true;
@@ -83,16 +84,18 @@ export class MyComponent extends Component {
 
   registerSocketListener = () => {
     this.state.socket.on("ok", (data) => {
-      console.log("北京正常");
-      let boxC = this.Bodies.rectangle(200, 200, 80, 80, {
+      let boxC = this.Bodies.rectangle(200, 200, 45, 125, {
         inertia: Infinity,
         render: {
-          strokeStyle: 'blue',
           lineWidth: 3
-     }
+        }
       })
+      console.log("北京正常",boxC);
+      boxC.bodyType = "player"
       boxC.uuid = data.uuid
       boxC.name = data.name
+      boxC.friction = 0
+      boxC.frictionAir = 0
       boxC.collisionFilter = {
         category: 0x0002,
         mask: 0x0001
@@ -100,7 +103,7 @@ export class MyComponent extends Component {
       this.setState({player: boxC}, () => {
         Matter.World.add(this.engine.world, boxC)
       })
-      this.state.socket.emit("joined",{name:boxC.name, uuid:boxC.uuid, position: boxC.position})
+      this.state.socket.emit("joined",{name:boxC.name, uuid:boxC.uuid, position: boxC.position, velocity: boxC.velocity})
     })
 
     this.state.socket.on("update", (data) => {
@@ -118,8 +121,9 @@ export class MyComponent extends Component {
       Object.keys(data).forEach((player)=>{
         if(!bodiesUUID.includes(player)) {
           console.log("------",data[player]);
-          let boxD = this.Bodies.rectangle(200, 200, 80, 80, {inertia: Infinity})
+          let boxD = this.Bodies.rectangle(200, 200, 45, 125, {inertia: Infinity})
           boxD.uuid = player
+          boxD.bodyType = "player"
           boxD.name = data[player].name
           boxD.collisionFilter = {
             category: 0x0002,
@@ -133,7 +137,7 @@ export class MyComponent extends Component {
         setInterval(() => {
           if (this.state.player != undefined) {
             // console.log(this.state.player);
-            this.state.socket.emit("moving", {uuid: this.state.player.uuid, position: this.state.player.position})
+            this.state.socket.emit("moving", {uuid: this.state.player.uuid, position: this.state.player.position, velocity: this.state.player.velocity})
           }  
         });
       })
@@ -147,10 +151,22 @@ export class MyComponent extends Component {
             var position = data[player].position;
             // console.log(this.state.other_player);
             Matter.Body.setPosition(this.state.other_player[player],position)
+            this.state.other_player[player].velocity = data[player].velocity
           }
         })
       }
     })
+
+    this.state.socket.on("playerLeaved", (uuid) => {
+      var leaved = this.state.other_player[uuid]
+      var new_other_player = this.state.other_player
+      delete new_other_player[uuid]
+      this.setState({other_player: new_other_player}, () => {
+        if(leaved != undefined) {
+          Matter.World.remove(this.engine.world,leaved)
+        }
+      })
+    });
   }
   
   bindKeys = () => {
@@ -160,26 +176,32 @@ export class MyComponent extends Component {
   
     left.press = () => {
       // console.log("test");
-      Matter.Body.setPosition(this.state.player,{x:this.state.player.position.x-1, y:this.state.player.position.y})
+      // Matter.Body.setPosition(this.state.player,{x:this.state.player.position.x-1, y:this.state.player.position.y})
+      Matter.Body.setVelocity(this.state.player, Matter.Vector.create(-8,this.state.player.velocity.y))
     }
   
     left.release = () => {
-  
+      if(!right.isDown) {
+        Matter.Body.setVelocity(this.state.player, Matter.Vector.create(0,this.state.player.velocity.y))
+      }
     }
   
     right.press = () => {
       // console.log("test");
-      Matter.Body.setPosition(this.state.player,{x:this.state.player.position.x+1, y:this.state.player.position.y})
+      // Matter.Body.setPosition(this.state.player,{x:this.state.player.position.x+1, y:this.state.player.position.y})
+      Matter.Body.setVelocity(this.state.player, Matter.Vector.create(8,this.state.player.velocity.y))
     }
   
     right.release = () => {
-  
+      if(!left.isDown) {
+        Matter.Body.setVelocity(this.state.player, Matter.Vector.create(0,this.state.player.velocity.y))
+      }
     }
   
     up.press = () => {
       // console.log("test");
       this.setState({onGround: false})
-      Matter.Body.applyForce(this.state.player, { x: this.state.player.position.x, y: this.state.player.position.y }, { x: 0, y: -0.5 });
+      Matter.Body.applyForce(this.state.player, { x: this.state.player.position.x, y: this.state.player.position.y }, { x: 0, y: -0.2 });
     }
     
     up.release = () => {
@@ -216,13 +238,16 @@ export class MyComponent extends Component {
       category: 0x0002,
       mask: 0x0001
     }
+    boxA.bodyType = "map"
     boxB.collisionFilter = {
       category: 0x0002,
       mask: 0x0001
     }
+    boxB.bodyType = "map"
   
     // 5-2. 创建地面，将isStatic设为true，表示物体静止
     let ground = this.Bodies.rectangle(400, 610, 810, 30, { isStatic: true })
+    ground.friction = 0
     let ground2 = this.Bodies.rectangle(1220, 610, 500, 30, { isStatic: true })
     // let ground3 = Bodies.rectangle(400, 6, 400, 30, { isStatic: true })
     // let ground4 = Bodies.rectangle(400, 610, 100, 30, { isStatic: true })
@@ -275,20 +300,20 @@ export class MyComponent extends Component {
   render() {
     return (
       <div className=''>
-        <Row className='justify-content-center' style={{marginTop:"20px", marginBottom:"20px", display: this.state.joined ? 'none': ''}}>
+        <Row className='justify-content-center' style={{paddingTop:"20px", paddingBottom:"20px",display: this.state.joined ? 'none': ''}}>
           <Col>
             <Row className='justify-content-end'>
-              <input ref = {this.nameInput} style= {{width:"250px",marginRight:"10px"}} className = "form-control" type="text" placeholder="Your Name"/>
+              <input ref = {this.nameInput} style= {{width:"250px"}} className = "form-control" type="text" placeholder="Your Name"/>
             </Row>
           </Col>
 
           <Col>
             <Row className='justify-content-start'>
-              <button onClick = {this.joinGame} style={{width:'100px',marginLeft:"10px"}} type="button" className="btn btn-primary">Join Game</button>
+              <button onClick = {this.joinGame} style={{width:'100px'}} type="button" className="btn btn-primary">Join Game</button>
             </Row>
           </Col>
         </Row>
-        <Row>
+        <Row className=''>
           <div style={{marginTop:"20px", marginBottom:"20px"}}>Welcome to UTS Interactive Game <span style={{fontWeight:"bold", color:'Blue'}}>{this.state.player.name}</span>!</div>
         </Row>
         <div id="game-canvas" ref={this.gameCanvas}>

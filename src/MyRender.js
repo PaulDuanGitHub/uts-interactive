@@ -6,9 +6,12 @@
 * @class MyRender
 */
 import {Body, Common, Composite, Bounds, Events, Vector, Mouse} from 'matter-js';
+import player128_leftURL from "./assets/player128_left.png" 
+import player128_rightURL from "./assets/player128_right.png" 
+import player128_standURL from "./assets/player128_stand.png" 
+import player128_jumpURL from "./assets/player128_jump.png" 
 
 var MyRender = {};
-
 export default MyRender;
 
 (function() {
@@ -36,7 +39,17 @@ export default MyRender;
      * @param {object} [options]
      * @return {render} A new renderer
      */
+    const player128_stand = new Image()
+    const player128_jump = new Image()
+    const player128_left = new Image()
+    const player128_right = new Image()
+
+    player128_stand.src = player128_standURL;
+    player128_jump.src = player128_jumpURL;
+    player128_left.src = player128_leftURL;
+    player128_right.src = player128_rightURL
     MyRender.create = function(options) {
+
         var defaults = {
             engine: null,
             element: null,
@@ -423,7 +436,7 @@ export default MyRender;
 
         if (!options.wireframes || (engine.enableSleeping && options.showSleeping)) {
             // fully featured rendering of bodies
-            MyRender.bodies(render, bodies, context);
+            MyRender.bodies(render, bodies, context, time);
         } else {
             if (options.showConvexHulls)
                 MyRender.bodyConvexHulls(render, bodies, context);
@@ -730,7 +743,7 @@ export default MyRender;
      * @param {body[]} bodies
      * @param {RenderingContext} context
      */
-    MyRender.bodies = function(render, bodies, context) {
+    MyRender.bodies = function(render, bodies, context, time) {
         var c = context,
             engine = render.engine,
             options = render.options,
@@ -805,18 +818,100 @@ export default MyRender;
 
                     if (!options.wireframes) {
                         c.fillStyle = part.render.fillStyle;
-
-                        if (part.render.lineWidth) {
-                            c.lineWidth = part.render.lineWidth;
-                            c.strokeStyle = part.render.strokeStyle;
-                            c.stroke();
-                        }
-
-                        c.fill();
-                        if(part.name != undefined) {
-                            c.font = "30px Arial";
-                            c.textAlign = "center";
-                            c.fillText(part.name, part.position.x, part.position.y - 50);
+                        if(part.bodyType == 'player') {
+                            if (part.render.lineWidth) {
+                                c.lineWidth = part.render.lineWidth;
+                                c.strokeStyle = part.render.strokeStyle;
+                                c.stroke();
+                            }
+                            if (part.velocity.y != 0) {
+                                // document.getElementById("game-canvas").append(image)
+                                const w = 100;
+                                const h = 125;
+                                // console.log((~~(time/1000 % 6)),offset);
+                                const {x, y} = part.position;
+                                c.drawImage(
+                                  player128_jump,      // image
+                                  part.velocity.x == 0 ? 200 : (part.velocity.x > 0 ? 0 : 100),     // sx
+                                  0,         // sy
+                                  w,          // sWidth
+                                  h,          // sHeight
+                                  x - w / 2,  // dx
+                                  y - h / 2,  // dy
+                                  w,          // dWidth
+                                  h           // dHeight
+                                );
+                            }else if (part.velocity.x > 0) {
+                                const w = 100;
+                                const h = 125;
+                                // const offset = 0 ;
+                                const offset = ((~~(time/80 % 6))) * w ;
+                                // console.log((~~(time/1000 % 6)),offset);
+                                const {x, y} = part.position;
+                                c.drawImage(
+                                    player128_right,      // image
+                                    offset,     // sx
+                                    0,         // sy
+                                    w,          // sWidth
+                                    h,          // sHeight
+                                    x - w / 2,  // dx
+                                    y - h / 2,  // dy
+                                    w,          // dWidth
+                                    h           // dHeight
+                                );
+                            }else if (part.velocity.x < 0) {
+                                // document.getElementById("game-canvas").append(image)
+                                const w = 100;
+                                const h = 125;
+                                // const offset = 0 ;
+                                const offset = ((~~(time/80 % 6))) * w ;
+                                // console.log((~~(time/1000 % 6)),offset);
+                                const {x, y} = part.position;
+                                c.drawImage(
+                                  player128_left,      // image
+                                  offset,     // sx
+                                  0,         // sy
+                                  w,          // sWidth
+                                  h,          // sHeight
+                                  x - w / 2,  // dx
+                                  y - h / 2,  // dy
+                                  w,          // dWidth
+                                  h           // dHeight
+                                );
+                            }else {
+                                // document.getElementById("game-canvas").append(image)
+                                const w = 100;
+                                const h = 125;
+                                // console.log((~~(time/1000 % 6)),offset);
+                                const {x, y} = part.position;
+                                c.drawImage(
+                                  player128_stand,      // image
+                                  0,     // sx
+                                  0,         // sy
+                                  w,          // sWidth
+                                  h,          // sHeight
+                                  x - w / 2,  // dx
+                                  y - h / 2,  // dy
+                                  w,          // dWidth
+                                  h           // dHeight
+                                );
+                            }
+                            
+                            // c.fill();
+                            if(part.name != undefined) {
+                                c.font = "30px Arial";
+                                c.fillStyle = "blue"
+                                c.textAlign = "center";
+                                c.fillText(part.name, part.position.x, part.position.y - 80);
+                            }
+                        }else {
+                            if (part.render.lineWidth) {
+                                c.lineWidth = part.render.lineWidth;
+                                c.strokeStyle = part.render.strokeStyle;
+                                c.stroke();
+                            }
+    
+                            c.fill();
                         }
                     } else {
                         c.lineWidth = 1;

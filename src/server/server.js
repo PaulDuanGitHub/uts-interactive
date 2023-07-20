@@ -21,14 +21,22 @@ app.post('/api/join-room', function (req, res) {
 })
 
 io.on('connection', (socket) => {
+    socket.on("disconnect", () => {
+        console.log(socket.id, "left the game", "current player: ", Object.keys(users).length);
+        delete users[socket.uuid]
+        io.sockets.emit("playerLeaved",socket.uuid)
+    })
+
 	socket.on("joinRoom", (data) => {
-        console.log(data.uuid);
         socket.emit("ok",data)
 	})
-
+    
     socket.on("joined", (data) => {
         // console.log(data.uuid);
-        users[data.uuid] = {name: data.name, position: data.position}
+        users[data.uuid] = {name: data.name, position: data.position, velocity: data.velocity}
+        users[data.uuid].socketID = socket.id
+        socket.uuid = data.uuid
+        console.log(data.name, " joined the game, current player: ", Object.keys(users).length);
         io.sockets.emit("update",users)
         // console.log(users);
 	})
@@ -37,6 +45,7 @@ io.on('connection', (socket) => {
         // console.log(data.position);
         if(users[data.uuid]!=undefined) {
             users[data.uuid].position = data.position
+            users[data.uuid].velocity = data.velocity
             io.sockets.emit("updatePosition",users)
         }
     })
