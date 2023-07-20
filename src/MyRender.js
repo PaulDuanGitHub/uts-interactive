@@ -824,7 +824,7 @@ export default MyRender;
                                 c.strokeStyle = part.render.strokeStyle;
                                 c.stroke();
                             }
-                            if (part.velocity.y != 0) {
+                            if (Math.abs(part.velocity.y) > 1.15) {
                                 // document.getElementById("game-canvas").append(image)
                                 const w = 100;
                                 const h = 125;
@@ -832,7 +832,7 @@ export default MyRender;
                                 const {x, y} = part.position;
                                 c.drawImage(
                                   player128_jump,      // image
-                                  part.velocity.x == 0 ? 200 : (part.velocity.x > 0 ? 0 : 100),     // sx
+                                  Math.abs(part.velocity.x) < 1.15 ? 200 : (part.velocity.x > 0 ? 0 : 100),     // sx
                                   0,         // sy
                                   w,          // sWidth
                                   h,          // sHeight

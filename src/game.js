@@ -102,8 +102,14 @@ export class MyComponent extends Component {
       }
       this.setState({player: boxC}, () => {
         Matter.World.add(this.engine.world, boxC)
+        this.state.socket.emit("joined",{name:boxC.name, uuid:boxC.uuid, position: boxC.position, velocity: boxC.velocity})
+        // setInterval(() => {
+        //   if (this.state.player != undefined && (this.state.player.velocity.x != 0 || this.state.player.velocity.y != 0)) {
+        //     // console.log(this.state.player);
+        //     this.state.socket.emit("moving", {uuid: this.state.player.uuid, position: this.state.player.position, velocity: this.state.player.velocity, name: this.state.player.name})
+        //   }  
+        // });
       })
-      this.state.socket.emit("joined",{name:boxC.name, uuid:boxC.uuid, position: boxC.position, velocity: boxC.velocity})
     })
 
     this.state.socket.on("update", (data) => {
@@ -121,7 +127,7 @@ export class MyComponent extends Component {
       Object.keys(data).forEach((player)=>{
         if(!bodiesUUID.includes(player)) {
           console.log("------",data[player]);
-          let boxD = this.Bodies.rectangle(200, 200, 45, 125, {inertia: Infinity})
+          let boxD = this.Bodies.rectangle(200, 200, 45, 125, {inertia: Infinity, isStatic: true})
           boxD.uuid = player
           boxD.bodyType = "player"
           boxD.name = data[player].name
@@ -133,14 +139,7 @@ export class MyComponent extends Component {
           new_other_player[boxD.uuid] = boxD
         }
       })
-      this.setState({other_player: new_other_player}, () => {
-        setInterval(() => {
-          if (this.state.player != undefined) {
-            // console.log(this.state.player);
-            this.state.socket.emit("moving", {uuid: this.state.player.uuid, position: this.state.player.position, velocity: this.state.player.velocity})
-          }  
-        });
-      })
+      this.setState({other_player: new_other_player}, () => {})
     })
     
     this.state.socket.on("updatePosition", (data) => {
@@ -152,6 +151,7 @@ export class MyComponent extends Component {
             // console.log(this.state.other_player);
             Matter.Body.setPosition(this.state.other_player[player],position)
             this.state.other_player[player].velocity = data[player].velocity
+            // console.log(this.state.other_player[player].velocity);
           }
         })
       }
@@ -260,7 +260,16 @@ export class MyComponent extends Component {
     Matter.Events.on(this.engine, 'collisionStart', (event) => {
       this.setState({onGround: true})
     })
-  
+    
+    Matter.Events.on(render, 'afterRender', (event) => {
+      // if (this.state.player != undefined && (Math.abs(this.state.player.velocity.x) > 1.137 || Math.abs(this.state.player.velocity.y) > 1.137)) {
+      if (this.state.player != undefined) {
+        // console.log(this.state.player);
+        console.log();
+        this.state.socket.emit("moving", {uuid: this.state.player.uuid, position: this.state.player.position, velocity: this.state.player.velocity, name: this.state.player.name})
+      }  
+    })
+
     setInterval(() => {
       Matter.Render.lookAt(render, this.state.player,{
         x: 500,

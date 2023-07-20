@@ -46,6 +46,7 @@ io.on('connection', (socket) => {
         if(users[data.uuid]!=undefined) {
             users[data.uuid].position = data.position
             users[data.uuid].velocity = data.velocity
+            console.log(data.name, " is moving, position:", data.position, " velocity: ",data.velocity, Object.values(users));
             io.sockets.emit("updatePosition",users)
         }
     })
