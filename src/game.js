@@ -1,12 +1,12 @@
-import logo from './logo.svg';
 import { Component, createFactory, createRef } from 'react';
 import Matter from 'matter-js';
 import io from 'socket.io-client';
-import axios from "axios";
-import {url, isSocket} from "./Api.js";
+import { url, isSocket } from "./Api.js";
 import { v4 } from 'uuid';
 import MyRender from './MyRender';
 import { Col, Row, Form } from 'react-bootstrap';
+import 'pathseg'
+import lobbyURL from './assets/lobbytest.svg'
 
 export class MyComponent extends Component {
   Engine;
@@ -22,10 +22,10 @@ export class MyComponent extends Component {
   }
 
   state = {
-    onGround:true,
+    onGround: true,
     joined: false,
-    socket: io.connect(isSocket? "https://api.paulduan.tk/" : "http://127.0.0.1:8888/", isSocket ? {path :'/uts-interactive/socket.io'} : {}),
-    player:Matter.Bodies.rectangle(200, 200, 80, 80, {inertia: Infinity}),
+    socket: io.connect(isSocket ? "https://api.paulduan.tk/" : "http://127.0.0.1:8888/", isSocket ? { path: '/uts-interactive/socket.io' } : {}),
+    player: Matter.Bodies.rectangle(200, 200, 80, 80, { inertia: Infinity }),
     other_player: {}
   }
 
@@ -39,14 +39,14 @@ export class MyComponent extends Component {
     key.interval = undefined;
     //The `downHandler`
     key.downHandler = event => {
-      console.log(key.code,this.state.onGround);
+      console.log(key.code, this.state.onGround);
       if (event.keyCode === key.code) {
         if (key.isUp && key.press) {
           if (key.code === 38) {
             if (this.state.onGround) {
               key.press();
             }
-          }else {
+          } else {
             // key.interval = setInterval(() => {
             //   key.press();
             // });
@@ -90,7 +90,7 @@ export class MyComponent extends Component {
           lineWidth: 3
         }
       })
-      console.log("北京正常",boxC);
+      console.log("北京正常", boxC);
       boxC.bodyType = "player"
       boxC.uuid = data.uuid
       boxC.name = data.name
@@ -100,9 +100,9 @@ export class MyComponent extends Component {
         category: 0x0002,
         mask: 0x0001
       }
-      this.setState({player: boxC}, () => {
+      this.setState({ player: boxC }, () => {
         Matter.World.add(this.engine.world, boxC)
-        this.state.socket.emit("joined",{name:boxC.name, uuid:boxC.uuid, position: boxC.position, velocity: boxC.velocity})
+        this.state.socket.emit("joined", { name: boxC.name, uuid: boxC.uuid, position: boxC.position, velocity: boxC.velocity })
         // setInterval(() => {
         //   if (this.state.player != undefined && (this.state.player.velocity.x != 0 || this.state.player.velocity.y != 0)) {
         //     // console.log(this.state.player);
@@ -113,7 +113,7 @@ export class MyComponent extends Component {
     })
 
     this.state.socket.on("update", (data) => {
-      
+
       var bodies = this.Composite.allBodies(this.engine.world)
       var bodiesUUID = []
       bodies.forEach(body => {
@@ -121,13 +121,13 @@ export class MyComponent extends Component {
           bodiesUUID.push(body.uuid)
         }
       });
-      
+
       console.log("update bodies", data, bodiesUUID);
       var new_other_player = this.state.other_player
-      Object.keys(data).forEach((player)=>{
-        if(!bodiesUUID.includes(player)) {
-          console.log("------",data[player]);
-          let boxD = this.Bodies.rectangle(200, 200, 45, 125, {inertia: Infinity, isStatic: true})
+      Object.keys(data).forEach((player) => {
+        if (!bodiesUUID.includes(player)) {
+          console.log("------", data[player]);
+          let boxD = this.Bodies.rectangle(200, 200, 45, 125, { inertia: Infinity, isStatic: true })
           boxD.uuid = player
           boxD.bodyType = "player"
           boxD.name = data[player].name
@@ -139,21 +139,29 @@ export class MyComponent extends Component {
           new_other_player[boxD.uuid] = boxD
         }
       })
-      this.setState({other_player: new_other_player}, () => {})
+      this.setState({ other_player: new_other_player }, () => { })
     })
-    
+
     this.state.socket.on("updatePosition", (data) => {
-      if(Object.keys(this.state.other_player).length !== 0) {
+      if (Object.keys(this.state.other_player).length !== 0) {
         // console.log("update position",data);
-        Object.keys(data).forEach((player)=>{
-          if(player != this.state.player.uuid) {
-            var position = data[player].position;
-            // console.log(this.state.other_player);
-            Matter.Body.setPosition(this.state.other_player[player],position)
-            this.state.other_player[player].velocity = data[player].velocity
-            // console.log(this.state.other_player[player].velocity);
-          }
-        })
+        // Object.keys(data).forEach((player) => {
+        //   if (player != this.state.player.uuid) {
+        //     var position = data[player].position;
+        //     // console.log(this.state.other_player);
+        //     Matter.Body.setPosition(this.state.other_player[player], position)
+        //     this.state.other_player[player].velocity = data[player].velocity
+        //     // console.log(this.state.other_player[player].velocity);
+        //   }
+        // })
+        var player = Object.keys(data)[0]
+        if (player != this.state.player.uuid) {
+          var position = data[player].position;
+          // console.log(this.state.other_player);
+          Matter.Body.setPosition(this.state.other_player[player], position)
+          this.state.other_player[player].velocity = data[player].velocity
+          // console.log(this.state.other_player[player].velocity);
+        }
       }
     })
 
@@ -161,51 +169,51 @@ export class MyComponent extends Component {
       var leaved = this.state.other_player[uuid]
       var new_other_player = this.state.other_player
       delete new_other_player[uuid]
-      this.setState({other_player: new_other_player}, () => {
-        if(leaved != undefined) {
-          Matter.World.remove(this.engine.world,leaved)
+      this.setState({ other_player: new_other_player }, () => {
+        if (leaved != undefined) {
+          Matter.World.remove(this.engine.world, leaved)
         }
       })
     });
   }
-  
+
   bindKeys = () => {
     let left = this.keyboard(37)
     let up = this.keyboard(38)
     let right = this.keyboard(39)
-  
+
     left.press = () => {
       // console.log("test");
       // Matter.Body.setPosition(this.state.player,{x:this.state.player.position.x-1, y:this.state.player.position.y})
-      Matter.Body.setVelocity(this.state.player, Matter.Vector.create(-8,this.state.player.velocity.y))
+      Matter.Body.setVelocity(this.state.player, Matter.Vector.create(-8, this.state.player.velocity.y))
     }
-  
+
     left.release = () => {
-      if(!right.isDown) {
-        Matter.Body.setVelocity(this.state.player, Matter.Vector.create(0,this.state.player.velocity.y))
+      if (!right.isDown) {
+        Matter.Body.setVelocity(this.state.player, Matter.Vector.create(0, this.state.player.velocity.y))
       }
     }
-  
+
     right.press = () => {
       // console.log("test");
       // Matter.Body.setPosition(this.state.player,{x:this.state.player.position.x+1, y:this.state.player.position.y})
-      Matter.Body.setVelocity(this.state.player, Matter.Vector.create(8,this.state.player.velocity.y))
+      Matter.Body.setVelocity(this.state.player, Matter.Vector.create(8, this.state.player.velocity.y))
     }
-  
+
     right.release = () => {
-      if(!left.isDown) {
-        Matter.Body.setVelocity(this.state.player, Matter.Vector.create(0,this.state.player.velocity.y))
+      if (!left.isDown) {
+        Matter.Body.setVelocity(this.state.player, Matter.Vector.create(0, this.state.player.velocity.y))
       }
     }
-  
+
     up.press = () => {
       // console.log("test");
-      this.setState({onGround: false})
+      this.setState({ onGround: false })
       Matter.Body.applyForce(this.state.player, { x: this.state.player.position.x, y: this.state.player.position.y }, { x: 0, y: -0.2 });
     }
-    
+
     up.release = () => {
-  
+
     }
   }
 
@@ -216,24 +224,24 @@ export class MyComponent extends Component {
     this.Bodies = Matter.Bodies
     this.Composite = Matter.Composite
     this.Runner = Matter.Runner
-  
+
     // 3. 创建引擎
     this.engine = this.Engine.create()
-  
+
     // 4. 创建渲染器，并将引擎连接到画布上
     let render = this.Render.create({
       element: document.getElementById('game-canvas'), // 绑定页面元素
       engine: this.engine, // 绑定引擎
       options: {
         wireframes: false,
-        background:"white"
+        background: "white"
       }
     })
-  
+
     // 5-1. 创建两个正方形
-    let boxA = this.Bodies.rectangle(400, 200, 80, 80, {inertia: Infinity})
+    let boxA = this.Bodies.rectangle(400, 200, 80, 80, { inertia: Infinity })
     let boxB = this.Bodies.rectangle(450, 50, 80, 80)
-  
+
     boxA.collisionFilter = {
       category: 0x0002,
       mask: 0x0001
@@ -244,59 +252,93 @@ export class MyComponent extends Component {
       mask: 0x0001
     }
     boxB.bodyType = "map"
-  
+
     // 5-2. 创建地面，将isStatic设为true，表示物体静止
     let ground = this.Bodies.rectangle(400, 610, 810, 30, { isStatic: true })
     ground.friction = 0
     let ground2 = this.Bodies.rectangle(1220, 610, 500, 30, { isStatic: true })
     // let ground3 = Bodies.rectangle(400, 6, 400, 30, { isStatic: true })
     // let ground4 = Bodies.rectangle(400, 610, 100, 30, { isStatic: true })
-  
+
     // ground.collisionFilter = {
     //   category: 0x0004,
     //   mask: 0x0002
     // }
-  
+
     Matter.Events.on(this.engine, 'collisionStart', (event) => {
-      this.setState({onGround: true})
+      this.setState({ onGround: true })
     })
-    
+
     Matter.Events.on(render, 'afterRender', (event) => {
       // if (this.state.player != undefined && (Math.abs(this.state.player.velocity.x) > 1.137 || Math.abs(this.state.player.velocity.y) > 1.137)) {
       if (this.state.player != undefined) {
         // console.log(this.state.player);
         console.log();
-        this.state.socket.emit("moving", {uuid: this.state.player.uuid, position: this.state.player.position, velocity: this.state.player.velocity, name: this.state.player.name})
-      }  
+        this.state.socket.emit("moving", { uuid: this.state.player.uuid, position: this.state.player.position, velocity: this.state.player.velocity, name: this.state.player.name })
+      }
     })
 
     setInterval(() => {
-      Matter.Render.lookAt(render, this.state.player,{
+      Matter.Render.lookAt(render, this.state.player, {
         x: 500,
         y: 500
       })
     })
-  
+
     // 6. 将所有物体添加到世界中
     // this.Composite.add(this.engine.world, [boxA, boxB, ground, ground2])
     this.Composite.add(this.engine.world, [ground, ground2])
+    // this.loadMap()
     // 7. 执行渲染操作
     this.Render.run(render)
     // 8. 创建运行方法
     var runner = this.Runner.create()
     // 9. 运行渲染器
     this.Runner.run(runner, this.engine)
-    this.state.socket.emit("joinRoom", {name:name,uuid: v4()})
+    this.state.socket.emit("joinRoom", { name: name, uuid: v4() })
+  }
+
+  loadMap = () => {
+    Matter.Common.setDecomp(require('poly-decomp'));
+
+    // add bodies
+    if (typeof fetch !== 'undefined') {
+      var select = (root, selector) => {
+      console.log("pass3");
+        return Array.prototype.slice.call(root.querySelectorAll(selector));
+      };
+      console.log("pass");
+      var loadSvg = async (url) => {
+        const response = await fetch(url);
+        const raw = await response.text();
+        return (new window.DOMParser()).parseFromString(raw, 'image/svg+xml');
+      };
+      loadSvg(lobbyURL).then((root) => {
+      console.log("pass");
+        var vertexSets = select(root, 'path')
+          .map((path) => { return Matter.Vertices.scale(Matter.Svg.pathToVertices(path, 30),10,10); });
+        console.log(vertexSets)
+        Matter.Composite.add(this.engine.world, Matter.Bodies.fromVertices(481, 281, vertexSets, {
+          render: {
+            fillStyle: 'black',
+            strokeStyle: 'black',
+            lineWidth: 1
+          }
+        }, true));
+      });
+    } else {
+      Matter.Common.warn('Fetch is not available. Could not load SVG.');
+    }
   }
 
   joinGame = () => {
     var name = this.nameInput.current.value.trim();
-    if (!name == ""){
-      this.setState({joined:true}, () => {
+    if (!name == "") {
+      this.setState({ joined: true }, () => {
         this.renderCanvas(name)
         this.registerSocketListener()
-      }) 
-    }else{
+      })
+    } else {
       alert("Please enter your name before join the game!")
     }
   }
@@ -309,21 +351,21 @@ export class MyComponent extends Component {
   render() {
     return (
       <div className=''>
-        <Row className='justify-content-center' style={{paddingTop:"20px", paddingBottom:"20px",display: this.state.joined ? 'none': ''}}>
+        <Row className='justify-content-center' style={{ paddingTop: "20px", paddingBottom: "20px", display: this.state.joined ? 'none' : '' }}>
           <Col>
             <Row className='justify-content-end'>
-              <input ref = {this.nameInput} style= {{width:"250px"}} className = "form-control" type="text" placeholder="Your Name"/>
+              <input ref={this.nameInput} style={{ width: "250px" }} className="form-control" type="text" placeholder="Your Name" />
             </Row>
           </Col>
 
           <Col>
             <Row className='justify-content-start'>
-              <button onClick = {this.joinGame} style={{width:'100px'}} type="button" className="btn btn-primary">Join Game</button>
+              <button onClick={this.joinGame} style={{ width: '100px' }} type="button" className="btn btn-primary">Join Game</button>
             </Row>
           </Col>
         </Row>
         <Row className=''>
-          <div style={{marginTop:"20px", marginBottom:"20px"}}>Welcome to UTS Interactive Game <span style={{fontWeight:"bold", color:'Blue'}}>{this.state.player.name}</span>!</div>
+          <div style={{ marginTop: "20px", marginBottom: "20px" }}>Welcome to UTS Interactive Game <span style={{ fontWeight: "bold", color: 'Blue' }}>{this.state.player.name}</span>!</div>
         </Row>
         <div id="game-canvas" ref={this.gameCanvas}>
           HAHAH
