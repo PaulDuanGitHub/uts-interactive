@@ -15,6 +15,7 @@ export class MyComponent extends Component {
   Composite;
   Runner;
   engine;
+  myRender;
   constructor() {
     super();
     this.gameCanvas = createRef();
@@ -56,7 +57,9 @@ export class MyComponent extends Component {
         key.isDown = true;
         key.isUp = false;
       }
-      // event.preventDefault();
+      if (event.keyCode > 36 && event.keyCode < 40) {
+        event.preventDefault();
+      }
     };
 
     //The `upHandler`
@@ -69,7 +72,9 @@ export class MyComponent extends Component {
         key.isDown = false;
         key.isUp = true;
       }
-      // event.preventDefault();
+      if (keyCode > 36 && keyCode < 40) {
+        event.preventDefault();
+      }
     };
 
     //Attach event listeners
@@ -234,10 +239,15 @@ export class MyComponent extends Component {
       engine: this.engine, // 绑定引擎
       options: {
         wireframes: false,
-        background: "white"
+        background: "#eeeeee",
+        hasBounds: true,
+        // background: "#14151f",
+        height:"600",
+        width:"800"
       }
     })
-
+    this.myRender = render
+    // console.log(render.options.height, render.options.width);
     // 5-1. 创建两个正方形
     let boxA = this.Bodies.rectangle(400, 200, 80, 80, { inertia: Infinity })
     let boxB = this.Bodies.rectangle(450, 50, 80, 80)
@@ -256,7 +266,7 @@ export class MyComponent extends Component {
     // 5-2. 创建地面，将isStatic设为true，表示物体静止
     let ground = this.Bodies.rectangle(400, 610, 810, 30, { isStatic: true })
     ground.friction = 0
-    let ground2 = this.Bodies.rectangle(1220, 610, 500, 30, { isStatic: true })
+    let ground2 = this.Bodies.rectangle(1220, 610, 810, 30, { isStatic: true })
     // let ground3 = Bodies.rectangle(400, 6, 400, 30, { isStatic: true })
     // let ground4 = Bodies.rectangle(400, 610, 100, 30, { isStatic: true })
 
@@ -274,17 +284,15 @@ export class MyComponent extends Component {
       if (this.state.player != undefined) {
         // console.log(this.state.player);
         console.log();
-        this.state.socket.emit("moving", { uuid: this.state.player.uuid, position: this.state.player.position, velocity: this.state.player.velocity, name: this.state.player.name })
+        if(this.state.player.speed != 0) {
+          this.state.socket.emit("moving", { uuid: this.state.player.uuid, position: this.state.player.position, velocity: this.state.player.velocity, name: this.state.player.name })
+        }
       }
-    })
-
-    setInterval(() => {
       Matter.Render.lookAt(render, this.state.player, {
         x: 500,
-        y: 500
-      })
+        y: 500,
+      }, true)
     })
-
     // 6. 将所有物体添加到世界中
     // this.Composite.add(this.engine.world, [boxA, boxB, ground, ground2])
     this.Composite.add(this.engine.world, [ground, ground2])
@@ -343,6 +351,15 @@ export class MyComponent extends Component {
     }
   }
 
+  resetPos = () => {
+    Matter.Body.setPosition(this.state.player, Matter.Vector.create(200,200))
+    Matter.Body.setVelocity(this.state.player, Matter.Vector.create(0,0))
+    Matter.Render.lookAt(this.myRender, this.state.player, {
+      x: 500,
+      y: 500,
+    }, true)
+  }
+
   componentDidMount = () => {
     // this.renderCanvas()
     this.bindKeys()
@@ -365,8 +382,11 @@ export class MyComponent extends Component {
           </Col>
         </Row>
         <Row className=''>
-          <div style={{ marginTop: "20px", marginBottom: "20px" }}>Welcome to UTS Interactive Game <span style={{ fontWeight: "bold", color: 'Blue' }}>{this.state.player.name}</span>!</div>
+          <div style={{ marginTop: "20px",marginBottom: "20px"}}>Welcome to UTS Interactive Game <span style={{ fontWeight: "bold", color: 'Blue' }}>{this.state.player.name}</span>!</div>
         </Row>
+        <div style={{position:'relative', display: this.state.joined ? '' : 'none' }}>
+          <button onClick={this.resetPos} className="btn btn-success shadow-none" style={{fontSize:'35px',lineHeight:'0.8', paddingBottom:"15px",position:'absolute', top:"10px", left:`calc(50% - 390px)`, borderl:'none'}}>⟳</button>
+        </div>
         <div id="game-canvas" ref={this.gameCanvas}>
           HAHAH
         </div>

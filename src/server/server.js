@@ -51,7 +51,7 @@ io.on('connection', (socket) => {
             var updatePack = {}
             updatePack[data.uuid] = users[data.uuid]
             io.sockets.emit("updatePosition",updatePack)
-            console.log(socket.bytesSend);
+            // console.log(socket.bytesSend);
         }
     })
 })
