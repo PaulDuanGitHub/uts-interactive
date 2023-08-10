@@ -5,27 +5,31 @@
 *
 * @class MyRender
 */
-import {Body, Common, Composite, Bounds, Events, Vector, Mouse} from 'matter-js';
-import player128_leftURL from "./assets/player128_left.png" 
-import player128_rightURL from "./assets/player128_right.png" 
-import player128_standURL from "./assets/player128_stand.png" 
-import player128_jumpURL from "./assets/player128_jump.png" 
+import { Body, Common, Composite, Bounds, Events, Vector, Mouse } from 'matter-js';
+import player128_leftURL from "./assets/player/player128_left.png"
+import player128_rightURL from "./assets/player/player128_right.png"
+import player128_standURL from "./assets/player/player128_stand.png"
+import player128_jumpURL from "./assets/player/player128_jump.png"
+import player128_leftURL_powered from "./assets/player/player128_left_powered.png"
+import player128_rightURL_powered from "./assets/player/player128_right_powered.png"
+import player128_standURL_powered from "./assets/player/player128_stand_powered.png"
+import player128_jumpURL_powered from "./assets/player/player128_jump_powered.png"
 
 var MyRender = {};
 export default MyRender;
 
-(function() {
+(function () {
 
     var _requestAnimationFrame,
         _cancelAnimationFrame;
 
     if (typeof window !== 'undefined') {
         _requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame
-                                      || window.mozRequestAnimationFrame || window.msRequestAnimationFrame
-                                      || function(callback){ window.setTimeout(function() { callback(Common.now()); }, 1000 / 60); };
+            || window.mozRequestAnimationFrame || window.msRequestAnimationFrame
+            || function (callback) { window.setTimeout(function () { callback(Common.now()); }, 1000 / 60); };
 
         _cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame
-                                      || window.webkitCancelAnimationFrame || window.msCancelAnimationFrame;
+            || window.webkitCancelAnimationFrame || window.msCancelAnimationFrame;
     }
 
     MyRender._goodFps = 30;
@@ -43,12 +47,20 @@ export default MyRender;
     const player128_jump = new Image()
     const player128_left = new Image()
     const player128_right = new Image()
+    const player128_stand_powered = new Image()
+    const player128_jump_powered = new Image()
+    const player128_left_powered = new Image()
+    const player128_right_powered = new Image()
 
     player128_stand.src = player128_standURL;
     player128_jump.src = player128_jumpURL;
     player128_left.src = player128_leftURL;
     player128_right.src = player128_rightURL
-    MyRender.create = function(options) {
+    player128_stand_powered.src = player128_standURL_powered;
+    player128_jump_powered.src = player128_jumpURL_powered;
+    player128_left_powered.src = player128_leftURL_powered;
+    player128_right_powered.src = player128_rightURL_powered
+    MyRender.create = function (options) {
 
         var defaults = {
             engine: null,
@@ -142,10 +154,10 @@ export default MyRender;
      * @method run
      * @param {render} render
      */
-    MyRender.run = function(render) {
-        (function loop(time){
+    MyRender.run = function (render) {
+        (function loop(time) {
             render.frameRequestId = _requestAnimationFrame(loop);
-            
+
             _updateTiming(render, time);
 
             MyRender.world(render, time);
@@ -165,7 +177,7 @@ export default MyRender;
      * @method stop
      * @param {render} render
      */
-    MyRender.stop = function(render) {
+    MyRender.stop = function (render) {
         _cancelAnimationFrame(render.frameRequestId);
     };
 
@@ -176,7 +188,7 @@ export default MyRender;
      * @param {render} render
      * @param {number} pixelRatio
      */
-    MyRender.setPixelRatio = function(render, pixelRatio) {
+    MyRender.setPixelRatio = function (render, pixelRatio) {
         var options = render.options,
             canvas = render.canvas;
 
@@ -208,7 +220,7 @@ export default MyRender;
      * @param {number} width The width (in CSS pixels)
      * @param {number} height The height (in CSS pixels)
      */
-    MyRender.setSize = function(render, width, height) {
+    MyRender.setSize = function (render, width, height) {
         render.options.width = width;
         render.options.height = height;
         render.bounds.max.x = render.bounds.min.x + width;
@@ -235,7 +247,7 @@ export default MyRender;
      * @param {vector} [padding]
      * @param {bool} [center=true]
      */
-    MyRender.lookAt = function(render, objects, padding, center) {
+    MyRender.lookAt = function (render, objects, padding, center, offset) {
         center = typeof center !== 'undefined' ? center : true;
         objects = Common.isArray(objects) ? objects : [objects];
         padding = padding || {
@@ -288,7 +300,7 @@ export default MyRender;
 
         // enable bounds
         render.options.hasBounds = true;
-
+        // console.log(bounds.min.x,bounds.min.y,",",bounds.max.x,bounds.max.y, ",", bounds.max.x-bounds.min.x ,bounds.min.y-bounds.max.y);
         // position and size
         render.bounds.min.x = bounds.min.x;
         render.bounds.max.x = bounds.min.x + width * scaleX;
@@ -309,6 +321,12 @@ export default MyRender;
         render.bounds.min.y -= padding.y;
         render.bounds.max.y -= padding.y;
 
+        // adjust game camera
+        // render.bounds.min.x += offset.x;
+        // render.bounds.max.x -= offset.x;
+        // render.bounds.min.y -= offset.y;
+        // render.bounds.max.y -= offset.y;
+
         // update mouse
         if (render.mouse) {
             Mouse.setScale(render.mouse, {
@@ -325,17 +343,17 @@ export default MyRender;
      * @method startViewTransform
      * @param {render} render
      */
-    MyRender.startViewTransform = function(render) {
+    MyRender.startViewTransform = function (render) {
         var boundsWidth = render.bounds.max.x - render.bounds.min.x,
             boundsHeight = render.bounds.max.y - render.bounds.min.y,
             boundsScaleX = boundsWidth / render.options.width,
             boundsScaleY = boundsHeight / render.options.height;
 
         render.context.setTransform(
-            render.options.pixelRatio / boundsScaleX, 0, 0, 
+            render.options.pixelRatio / boundsScaleX, 0, 0,
             render.options.pixelRatio / boundsScaleY, 0, 0
         );
-        
+
         render.context.translate(-render.bounds.min.x, -render.bounds.min.y);
     };
 
@@ -344,7 +362,7 @@ export default MyRender;
      * @method endViewTransform
      * @param {render} render
      */
-    MyRender.endViewTransform = function(render) {
+    MyRender.endViewTransform = function (render) {
         render.context.setTransform(render.options.pixelRatio, 0, 0, render.options.pixelRatio, 0, 0);
     };
 
@@ -354,7 +372,7 @@ export default MyRender;
      * @method world
      * @param {render} render
      */
-    MyRender.world = function(render, time) {
+    MyRender.world = function (render, time) {
         var startTime = Common.now(),
             engine = render.engine,
             world = engine.world,
@@ -493,7 +511,7 @@ export default MyRender;
      * @param {RenderingContext} context
      * @param {Number} time
      */
-    MyRender.stats = function(render, context, time) {
+    MyRender.stats = function (render, context, time) {
         var engine = render.engine,
             world = engine.world,
             bodies = Composite.allBodies(world),
@@ -502,7 +520,7 @@ export default MyRender;
             height = 44,
             x = 0,
             y = 0;
-        
+
         // count parts
         for (var i = 0; i < bodies.length; i += 1) {
             parts += bodies[i].parts.length;
@@ -547,7 +565,7 @@ export default MyRender;
      * @param {render} render
      * @param {RenderingContext} context
      */
-    MyRender.performance = function(render, context) {
+    MyRender.performance = function (render, context) {
         var engine = render.engine,
             timing = render.timing,
             deltaHistory = timing.deltaHistory,
@@ -556,7 +574,7 @@ export default MyRender;
             engineDeltaHistory = timing.engineDeltaHistory,
             engineElapsedHistory = timing.engineElapsedHistory,
             lastEngineDelta = engine.timing.lastDelta;
-        
+
         var deltaMean = _mean(deltaHistory),
             elapsedMean = _mean(elapsedHistory),
             engineDeltaMean = _mean(engineDeltaHistory),
@@ -578,42 +596,42 @@ export default MyRender;
 
         // show FPS
         MyRender.status(
-            context, x, y, width, graphHeight, deltaHistory.length, 
-            Math.round(fps) + ' fps', 
+            context, x, y, width, graphHeight, deltaHistory.length,
+            Math.round(fps) + ' fps',
             fps / MyRender._goodFps,
-            function(i) { return (deltaHistory[i] / deltaMean) - 1; }
+            function (i) { return (deltaHistory[i] / deltaMean) - 1; }
         );
 
         // show engine delta
         MyRender.status(
             context, x + gap + width, y, width, graphHeight, engineDeltaHistory.length,
-            lastEngineDelta.toFixed(2) + ' dt', 
+            lastEngineDelta.toFixed(2) + ' dt',
             MyRender._goodDelta / lastEngineDelta,
-            function(i) { return (engineDeltaHistory[i] / engineDeltaMean) - 1; }
+            function (i) { return (engineDeltaHistory[i] / engineDeltaMean) - 1; }
         );
 
         // show engine update time
         MyRender.status(
             context, x + (gap + width) * 2, y, width, graphHeight, engineElapsedHistory.length,
-            engineElapsedMean.toFixed(2) + ' ut', 
+            engineElapsedMean.toFixed(2) + ' ut',
             1 - (engineElapsedMean / MyRender._goodFps),
-            function(i) { return (engineElapsedHistory[i] / engineElapsedMean) - 1; }
+            function (i) { return (engineElapsedHistory[i] / engineElapsedMean) - 1; }
         );
 
         // show render time
         MyRender.status(
             context, x + (gap + width) * 3, y, width, graphHeight, elapsedHistory.length,
-            elapsedMean.toFixed(2) + ' rt', 
+            elapsedMean.toFixed(2) + ' rt',
             1 - (elapsedMean / MyRender._goodFps),
-            function(i) { return (elapsedHistory[i] / elapsedMean) - 1; }
+            function (i) { return (elapsedHistory[i] / elapsedMean) - 1; }
         );
 
         // show effective speed
         MyRender.status(
-            context, x + (gap + width) * 4, y, width, graphHeight, timestampElapsedHistory.length, 
-            rateMean.toFixed(2) + ' x', 
+            context, x + (gap + width) * 4, y, width, graphHeight, timestampElapsedHistory.length,
+            rateMean.toFixed(2) + ' x',
             rateMean * rateMean * rateMean,
-            function(i) { return (((timestampElapsedHistory[i] / deltaHistory[i]) / rateMean) || 0) - 1; }
+            function (i) { return (((timestampElapsedHistory[i] / deltaHistory[i]) / rateMean) || 0) - 1; }
         );
     };
 
@@ -631,7 +649,7 @@ export default MyRender;
      * @param {string} indicator
      * @param {function} plotY
      */
-    MyRender.status = function(context, x, y, width, height, count, label, indicator, plotY) {
+    MyRender.status = function (context, x, y, width, height, count, label, indicator, plotY) {
         // background
         context.strokeStyle = '#888';
         context.fillStyle = '#444';
@@ -665,7 +683,7 @@ export default MyRender;
      * @param {constraint[]} constraints
      * @param {RenderingContext} context
      */
-    MyRender.constraints = function(constraints, context) {
+    MyRender.constraints = function (constraints, context) {
         var c = context;
 
         for (var i = 0; i < constraints.length; i++) {
@@ -743,7 +761,7 @@ export default MyRender;
      * @param {body[]} bodies
      * @param {RenderingContext} context
      */
-    MyRender.bodies = function(render, bodies, context, time) {
+    MyRender.bodies = function (render, bodies, context, time) {
         var c = context,
             engine = render.engine,
             options = render.options,
@@ -787,10 +805,15 @@ export default MyRender;
                         texture.width * sprite.xScale,
                         texture.height * sprite.yScale
                     );
-
                     // revert translation, hopefully faster than save / restore
                     c.rotate(-part.angle);
                     c.translate(-part.position.x, -part.position.y);
+                    // if (part.bodyType === "checkpoint") {
+                    //     c.font = "20px Arial";
+                    //     c.fillStyle = "blue"
+                    //     c.textAlign = "center";
+                    //     c.fillText("Check Point", part.position.x+30, part.position.y-30);
+                    // }
                 } else {
                     // part polygon
                     if (part.circleRadius) {
@@ -818,38 +841,41 @@ export default MyRender;
 
                     if (!options.wireframes) {
                         c.fillStyle = part.render.fillStyle;
-                        if(part.bodyType == 'player') {
+                        // console.log(part);
+                        if (part.bodyType === 'player') {
+                            // c.scale(0.4,0.4)
                             if (part.render.lineWidth) {
                                 c.lineWidth = part.render.lineWidth;
                                 c.strokeStyle = part.render.strokeStyle;
-                                c.stroke();
+                                // c.stroke();
                             }
                             if (Math.abs(part.velocity.y) > 1.15) {
                                 // document.getElementById("game-canvas").append(image)
-                                const w = 100;
-                                const h = 125;
+                                // console.log(part.name, part.velocity)
+                                const w = 50;
+                                const h = 63;
                                 // console.log((~~(time/1000 % 6)),offset);
-                                const {x, y} = part.position;
+                                const { x, y } = part.position;
                                 c.drawImage(
-                                  player128_jump,      // image
-                                  Math.abs(part.velocity.x) < 1.15 ? 200 : (part.velocity.x > 0 ? 0 : 100),     // sx
-                                  0,         // sy
-                                  w,          // sWidth
-                                  h,          // sHeight
-                                  x - w / 2,  // dx
-                                  y - h / 2,  // dy
-                                  w,          // dWidth
-                                  h           // dHeight
+                                    part.powered ? player128_jump_powered:player128_jump,      // image
+                                    Math.abs(part.velocity.x) < 1.15 ? 100 : (part.velocity.x > 0 ? 0 : 50),     // sx
+                                    0,         // sy
+                                    w,          // sWidth
+                                    h,          // sHeight
+                                    x - w / 2,  // dx
+                                    y - h / 2,  // dy
+                                    w,          // dWidth
+                                    h           // dHeight
                                 );
-                            }else if (part.velocity.x > 0) {
-                                const w = 100;
-                                const h = 125;
+                            } else if (part.velocity.x > 0) {
+                                const w = 50;
+                                const h = 63;
                                 // const offset = 0 ;
-                                const offset = ((~~(time/80 % 6))) * w ;
+                                const offset = ((~~(time / 80 % 6))) * w;
                                 // console.log((~~(time/1000 % 6)),offset);
-                                const {x, y} = part.position;
+                                const { x, y } = part.position;
                                 c.drawImage(
-                                    player128_right,      // image
+                                    part.powered ? player128_right_powered : player128_right,      // image
                                     offset,     // sx
                                     0,         // sy
                                     w,          // sWidth
@@ -859,58 +885,59 @@ export default MyRender;
                                     w,          // dWidth
                                     h           // dHeight
                                 );
-                            }else if (part.velocity.x < 0) {
+                            } else if (part.velocity.x < 0) {
                                 // document.getElementById("game-canvas").append(image)
-                                const w = 100;
-                                const h = 125;
+                                const w = 50;
+                                const h = 63;
                                 // const offset = 0 ;
-                                const offset = ((~~(time/80 % 6))) * w ;
+                                const offset = ((~~(time / 80 % 6))) * w;
                                 // console.log((~~(time/1000 % 6)),offset);
-                                const {x, y} = part.position;
+                                const { x, y } = part.position;
                                 c.drawImage(
-                                  player128_left,      // image
-                                  offset,     // sx
-                                  0,         // sy
-                                  w,          // sWidth
-                                  h,          // sHeight
-                                  x - w / 2,  // dx
-                                  y - h / 2,  // dy
-                                  w,          // dWidth
-                                  h           // dHeight
+                                    part.powered ? player128_left_powered : player128_left,      // image
+                                    offset,     // sx
+                                    0,         // sy
+                                    w,          // sWidth
+                                    h,          // sHeight
+                                    x - w / 2,  // dx
+                                    y - h / 2,  // dy
+                                    w,          // dWidth
+                                    h           // dHeight
                                 );
-                            }else {
+                            } else {
                                 // document.getElementById("game-canvas").append(image)
-                                const w = 100;
-                                const h = 125;
+                                const w = 50;
+                                const h = 63;
                                 // console.log((~~(time/1000 % 6)),offset);
-                                const {x, y} = part.position;
+                                const { x, y } = part.position;
                                 c.drawImage(
-                                  player128_stand,      // image
-                                  0,     // sx
-                                  0,         // sy
-                                  w,          // sWidth
-                                  h,          // sHeight
-                                  x - w / 2,  // dx
-                                  y - h / 2,  // dy
-                                  w,          // dWidth
-                                  h           // dHeight
+                                    part.powered ? player128_stand_powered : player128_stand,      // image
+                                    0,     // sx
+                                    0,         // sy
+                                    w,          // sWidth
+                                    h,          // sHeight
+                                    x - w / 2,  // dx
+                                    y - h / 2,  // dy
+                                    w,          // dWidth
+                                    h           // dHeight
                                 );
                             }
-                            
+
                             // c.fill();
-                            if(part.name != undefined) {
-                                c.font = "30px Arial";
+                            if (part.name != undefined) {
+                                c.font = "24px Arial";
                                 c.fillStyle = "blue"
                                 c.textAlign = "center";
-                                c.fillText(part.name, part.position.x, part.position.y - 80);
-                            }
-                        }else {
+                                c.fillText(part.name + ~~part.position.x + " " + ~~part.position.y, part.position.x, part.position.y - 40);
+                            } 
+                            // c.setTransform(1, 0, 0, 1, 0, 0);
+                        } else {
                             if (part.render.lineWidth) {
                                 c.lineWidth = part.render.lineWidth;
                                 c.strokeStyle = part.render.strokeStyle;
                                 c.stroke();
                             }
-    
+
                             c.fill();
                         }
                     } else {
@@ -933,7 +960,7 @@ export default MyRender;
      * @param {body[]} bodies
      * @param {RenderingContext} context
      */
-    MyRender.bodyWireframes = function(render, bodies, context) {
+    MyRender.bodyWireframes = function (render, bodies, context) {
         var c = context,
             showInternalEdges = render.options.showInternalEdges,
             body,
@@ -986,7 +1013,7 @@ export default MyRender;
      * @param {body[]} bodies
      * @param {RenderingContext} context
      */
-    MyRender.bodyConvexHulls = function(render, bodies, context) {
+    MyRender.bodyConvexHulls = function (render, bodies, context) {
         var c = context,
             body,
             part,
@@ -1025,7 +1052,7 @@ export default MyRender;
      * @param {body[]} bodies
      * @param {RenderingContext} context
      */
-    MyRender.vertexNumbers = function(render, bodies, context) {
+    MyRender.vertexNumbers = function (render, bodies, context) {
         var c = context,
             i,
             j,
@@ -1051,7 +1078,7 @@ export default MyRender;
      * @param {mouse} mouse
      * @param {RenderingContext} context
      */
-    MyRender.mousePosition = function(render, mouse, context) {
+    MyRender.mousePosition = function (render, mouse, context) {
         var c = context;
         c.fillStyle = 'rgba(255,255,255,0.8)';
         c.fillText(mouse.position.x + '  ' + mouse.position.y, mouse.position.x + 5, mouse.position.y - 5);
@@ -1065,7 +1092,7 @@ export default MyRender;
      * @param {body[]} bodies
      * @param {RenderingContext} context
      */
-    MyRender.bodyBounds = function(render, bodies, context) {
+    MyRender.bodyBounds = function (render, bodies, context) {
         var c = context,
             engine = render.engine,
             options = render.options;
@@ -1102,7 +1129,7 @@ export default MyRender;
      * @param {body[]} bodies
      * @param {RenderingContext} context
      */
-    MyRender.bodyAxes = function(render, bodies, context) {
+    MyRender.bodyAxes = function (render, bodies, context) {
         var c = context,
             engine = render.engine,
             options = render.options,
@@ -1136,8 +1163,8 @@ export default MyRender;
                     for (k = 0; k < part.axes.length; k++) {
                         // render a single axis indicator
                         c.moveTo(part.position.x, part.position.y);
-                        c.lineTo((part.vertices[0].x + part.vertices[part.vertices.length-1].x) / 2,
-                            (part.vertices[0].y + part.vertices[part.vertices.length-1].y) / 2);
+                        c.lineTo((part.vertices[0].x + part.vertices[part.vertices.length - 1].x) / 2,
+                            (part.vertices[0].y + part.vertices[part.vertices.length - 1].y) / 2);
                     }
                 }
             }
@@ -1164,7 +1191,7 @@ export default MyRender;
      * @param {body[]} bodies
      * @param {RenderingContext} context
      */
-    MyRender.bodyPositions = function(render, bodies, context) {
+    MyRender.bodyPositions = function (render, bodies, context) {
         var c = context,
             engine = render.engine,
             options = render.options,
@@ -1220,7 +1247,7 @@ export default MyRender;
      * @param {body[]} bodies
      * @param {RenderingContext} context
      */
-    MyRender.bodyVelocity = function(render, bodies, context) {
+    MyRender.bodyVelocity = function (render, bodies, context) {
         var c = context;
 
         c.beginPath();
@@ -1250,7 +1277,7 @@ export default MyRender;
      * @param {body[]} bodies
      * @param {RenderingContext} context
      */
-    MyRender.bodyIds = function(render, bodies, context) {
+    MyRender.bodyIds = function (render, bodies, context) {
         var c = context,
             i,
             j;
@@ -1277,7 +1304,7 @@ export default MyRender;
      * @param {pair[]} pairs
      * @param {RenderingContext} context
      */
-    MyRender.collisions = function(render, pairs, context) {
+    MyRender.collisions = function (render, pairs, context) {
         var c = context,
             options = render.options,
             pair,
@@ -1360,7 +1387,7 @@ export default MyRender;
      * @param {pair[]} pairs
      * @param {RenderingContext} context
      */
-    MyRender.separations = function(render, pairs, context) {
+    MyRender.separations = function (render, pairs, context) {
         var c = context,
             options = render.options,
             pair,
@@ -1416,7 +1443,7 @@ export default MyRender;
      * @param {inspector} inspector
      * @param {RenderingContext} context
      */
-    MyRender.inspector = function(inspector, context) {
+    MyRender.inspector = function (inspector, context) {
         var engine = inspector.engine,
             selected = inspector.selected,
             render = inspector.render,
@@ -1439,34 +1466,34 @@ export default MyRender;
             context.translate(0.5, 0.5);
             context.lineWidth = 1;
             context.strokeStyle = 'rgba(255,165,0,0.9)';
-            context.setLineDash([1,2]);
+            context.setLineDash([1, 2]);
 
             switch (item.type) {
 
-            case 'body':
+                case 'body':
 
-                // render body selections
-                bounds = item.bounds;
-                context.beginPath();
-                context.rect(Math.floor(bounds.min.x - 3), Math.floor(bounds.min.y - 3),
-                    Math.floor(bounds.max.x - bounds.min.x + 6), Math.floor(bounds.max.y - bounds.min.y + 6));
-                context.closePath();
-                context.stroke();
+                    // render body selections
+                    bounds = item.bounds;
+                    context.beginPath();
+                    context.rect(Math.floor(bounds.min.x - 3), Math.floor(bounds.min.y - 3),
+                        Math.floor(bounds.max.x - bounds.min.x + 6), Math.floor(bounds.max.y - bounds.min.y + 6));
+                    context.closePath();
+                    context.stroke();
 
-                break;
+                    break;
 
-            case 'constraint':
+                case 'constraint':
 
-                // render constraint selections
-                var point = item.pointA;
-                if (item.bodyA)
-                    point = item.pointB;
-                context.beginPath();
-                context.arc(point.x, point.y, 10, 0, 2 * Math.PI);
-                context.closePath();
-                context.stroke();
+                    // render constraint selections
+                    var point = item.pointA;
+                    if (item.bodyA)
+                        point = item.pointB;
+                    context.beginPath();
+                    context.arc(point.x, point.y, 10, 0, 2 * Math.PI);
+                    context.closePath();
+                    context.stroke();
 
-                break;
+                    break;
 
             }
 
@@ -1501,7 +1528,7 @@ export default MyRender;
      * @param {render} render
      * @param {number} time
      */
-    var _updateTiming = function(render, time) {
+    var _updateTiming = function (render, time) {
         var engine = render.engine,
             timing = render.timing,
             historySize = timing.historySize,
@@ -1536,7 +1563,7 @@ export default MyRender;
      * @param {Number[]} values
      * @return {Number} the mean of given values
      */
-    var _mean = function(values) {
+    var _mean = function (values) {
         var result = 0;
         for (var i = 0; i < values.length; i += 1) {
             result += values[i];
@@ -1551,12 +1578,12 @@ export default MyRender;
      * @param {} height
      * @return canvas
      */
-    var _createCanvas = function(width, height) {
+    var _createCanvas = function (width, height) {
         var canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
-        canvas.oncontextmenu = function() { return false; };
-        canvas.onselectstart = function() { return false; };
+        canvas.oncontextmenu = function () { return false; };
+        canvas.onselectstart = function () { return false; };
         return canvas;
     };
 
@@ -1567,12 +1594,12 @@ export default MyRender;
      * @param {HTMLElement} canvas
      * @return {Number} pixel ratio
      */
-    var _getPixelRatio = function(canvas) {
+    var _getPixelRatio = function (canvas) {
         var context = canvas.getContext('2d'),
             devicePixelRatio = window.devicePixelRatio || 1,
             backingStorePixelRatio = context.webkitBackingStorePixelRatio || context.mozBackingStorePixelRatio
-                                      || context.msBackingStorePixelRatio || context.oBackingStorePixelRatio
-                                      || context.backingStorePixelRatio || 1;
+                || context.msBackingStorePixelRatio || context.oBackingStorePixelRatio
+                || context.backingStorePixelRatio || 1;
 
         return devicePixelRatio / backingStorePixelRatio;
     };
@@ -1585,7 +1612,7 @@ export default MyRender;
      * @param {string} imagePath
      * @return {Image} texture
      */
-    var _getTexture = function(render, imagePath) {
+    var _getTexture = function (render, imagePath) {
         var image = render.textures[imagePath];
 
         if (image)
@@ -1604,7 +1631,7 @@ export default MyRender;
      * @param {render} render
      * @param {string} background
      */
-    var _applyBackground = function(render, background) {
+    var _applyBackground = function (render, background) {
         var cssBackground = background;
 
         if (/(jpg|gif|png)$/.test(background))
@@ -1824,7 +1851,7 @@ export default MyRender;
      * @type boolean
      * @default false
      */
-    
+
     /**
      * A flag to enable or disable rendering entirely.
      *
