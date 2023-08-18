@@ -10,6 +10,7 @@ import titleURL from './assets/map/lobby/title.png'
 import checkPointURL from './assets/map/checkpoint3.png'
 import bookingsURL from './assets/map/Bookings.png'
 import sharepointURL from './assets/map/SharePoint.png'
+import resetURL from './assets/map/lobby/reset.png'
 import buildMap from './buildMap.js';
 
 export class MyComponent extends Component {
@@ -27,6 +28,7 @@ export class MyComponent extends Component {
 		this.messageList = createRef();
 		this.timer = createRef();
 		this.rankingList = createRef();
+		this.resetBtn = createRef();
 	}
 
 	state = {
@@ -58,9 +60,10 @@ export class MyComponent extends Component {
 		//The `downHandler`
 		key.downHandler = event => {
 			// console.log(key.code, this.state.onGround);
-			if (event.keyCode === key.code) {
+			if (key.code.includes(event.keyCode)) {
 				if (key.isUp && key.press) {
-					if (key.code === 38) {
+					// alert(event.keyCode, event.keyCode in [38,87])
+					if (event.keyCode === 38 || event.keyCode === 87) {
 						if (this.state.onGround) {
 							key.press();
 						}
@@ -71,6 +74,8 @@ export class MyComponent extends Component {
 						// key.press();
 					}
 				}
+				// this.gameCanvas.current.click()
+				// console.log(this.gameCanvas.current.children);
 				console.log("key press");
 				key.isDown = true;
 				key.isUp = false;
@@ -83,7 +88,7 @@ export class MyComponent extends Component {
 		//The `upHandler`
 		key.upHandler = event => {
 			console.log(event);
-			if (event.keyCode === key.code) {
+			if (key.code.includes(event.keyCode)) {
 				if (key.isDown && key.release) {
 					key.release()
 					clearInterval(key.interval)
@@ -230,9 +235,9 @@ export class MyComponent extends Component {
 	}
 
 	bindKeys = () => {
-		this.left = this.keyboard(37)
-		this.up = this.keyboard(38)
-		this.right = this.keyboard(39)
+		this.left = this.keyboard([37,65])
+		this.up = this.keyboard([38,87])
+		this.right = this.keyboard([39,68])
 		let speed = 4
 		let jumpForce = 0.04
 		this.left.press = () => {
@@ -346,6 +351,23 @@ export class MyComponent extends Component {
 			}),
 			this.createCheckPoint(80, 155),
 			this.createCheckPoint(1280, 550,true),
+			this.Bodies.rectangle(1220+808/2*0.5, 475, 808 * 0.5, 64 * 0.5, {
+				isStatic: true,
+				render: {
+					lineWidth: 1,
+					sprite: {
+						texture: resetURL,
+						xOffset: 0,
+						yOffset: 0,
+						xScale: 0.5,
+						yScale: 0.5
+					}
+				},
+				collisionFilter: {
+					category: 0x0002,
+					mask: 0x0001
+				}
+			}),
 			this.createCheckPoint(3790, 525),
 			this.createCheckPoint(4250, 525),
 			this.createCheckPoint(3750, 300),
@@ -455,7 +477,7 @@ export class MyComponent extends Component {
 					if (pair.bodyB.bodyType === "donut") {
 						if(this.state.player.powered != true) {
 							this.state.player.powered = true
-							var countdown = 8
+							var countdown = 10
 							var timer = setInterval(() => {
 								if (countdown == 0) {
 									clearInterval(timer)
@@ -497,7 +519,7 @@ export class MyComponent extends Component {
 					if (pair.bodyA.bodyType === "donut") {
 						if(this.state.player.powered != true) {
 							this.state.player.powered = true
-							var countdown = 8
+							var countdown = 10
 							var timer = setInterval(() => {
 								if (countdown == 0) {
 									clearInterval(timer)
@@ -632,6 +654,7 @@ export class MyComponent extends Component {
 	}
 
 	joinGame = () => {
+		this.bindKeys()
 		var name = this.nameInput.current.value.trim();
 		if (!name == "") {
 			this.setState({ joined: true }, () => {
@@ -650,6 +673,7 @@ export class MyComponent extends Component {
 			x: 400,
 			y: 400,
 		}, true)
+		this.resetBtn.current.blur()
 	}
 
 	pushMessage = (name, join = true) => {
@@ -665,12 +689,11 @@ export class MyComponent extends Component {
 
 	componentDidMount = () => {
 		// this.renderCanvas()
-		this.bindKeys()
-		// this.nameInput.current.value = "test"
+		this.nameInput.current.value = "Paul"
 		// if(this.state.player != undefined) {
 		// 	window.location.reload();
 		// }
-		// this.joinGame()
+		this.joinGame()
 		this.timerInterval = setInterval(()=>{
 			if(this.state.startTime != undefined) {
 				const d = new Date(Date.UTC(0,0,0,0,0,0,Date.now() - this.state.startTime))
@@ -707,7 +730,7 @@ export class MyComponent extends Component {
 					<div style={{ marginTop: "20px", marginBottom: "20px" }}>Welcome to UTS Interactive Game <span style={{ fontWeight: "bold", color: 'Blue' }}>{this.state.player.name}</span>!<span> Your time: <span ref={this.timer}>00m 00s 000ms</span></span></div>
 				</Row>
 				<div style={{ position: 'relative', display: this.state.joined ? '' : 'none' }}>
-					<button onClick={this.resetPos} className="btn btn-success shadow-none" style={{ fontSize: '35px', lineHeight: '0.8', paddingBottom: "15px", position: 'absolute', top: "10px", left: `calc(50% - 390px)`, borderl: 'none' }}>⟳</button>
+					
 				</div>
 				<Row style={{ display: this.state.joined ? '' : 'none' }}>
 					<Col style={{ border: "1px ridge black" }}>
@@ -715,8 +738,9 @@ export class MyComponent extends Component {
 						<div ref={this.messageList}>
 						</div>
 					</Col>
-					<Col style={{ border: "1px ridge black" }}>
+					<Col style={{ border: "1px ridge black",position:"relative", padding:"0"}}>
 						<div id="game-canvas" style={{ height: "600px", width: "900px" }} ref={this.gameCanvas}></div>
+						<button ref={this.resetBtn} onClick={this.resetPos} className="btn btn-primary shadow-none" style={{ fontSize: '25px', lineHeight: '0.8', paddingBottom: "10px", position: 'absolute', top: "20px", left: `20px`, borderl: 'none', opacity:"80%" }}>⟳</button>
 					</Col>
 					<Col style={{ border: "1px ridge black" }}>
 						Ranking:

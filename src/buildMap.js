@@ -27,6 +27,7 @@ import congras from "./assets/map/congras.png"
 import crowd from "./assets/map/crowd.png"
 import ribbon from "./assets/map/ribbon-cut.png"
 import bsb from "./assets/map/bsb.png"
+import control from "./assets/map/lobby/control.png"
 
 var buildMap = {}
 buildMap.build = (composite, world) => {
@@ -35,7 +36,40 @@ buildMap.build = (composite, world) => {
         buildMap.createPlatform(4100, 580, 1400), //H Floor
         buildMap.createPlatform(2100, 580 - 80, 10, 650), //V player 80
         buildMap.createPlatform(4500, 580, 10, 730), //V
-
+        // Lobby
+        Bodies.rectangle(200, 515, 145 * 0.5, 145 * 0.5, {
+            isStatic: true,
+            isSensor: true,
+            bodyType: "donut",
+            render: {
+                lineWidth: 1,
+                sprite: {
+                    texture: donut,
+                    xOffset: 0,
+                    yOffset: 0,
+                    xScale: 0.5,
+                    yScale: 0.5
+                }
+            }
+        }),
+        Bodies.rectangle(600, 450, 508 * 0.5, 211 * 0.5, {
+            isStatic: true,
+            render: {
+                lineWidth: 1,
+                sprite: {
+                    texture: control,
+                    xOffset: 0,
+                    yOffset: 0,
+                    xScale: 0.5,
+                    yScale: 0.5
+                }
+            },
+            collisionFilter: {
+                category: 0x0002,
+                mask: 0x0001
+            }
+        }),
+        buildMap.createQuestion(1033, 160, "1 + 1 = ?:\n1. 1\n2. 2\n3. 3", "2"),
         // Questions
         buildMap.createQuestion(2344, 308, "What is UTAG's full name:\n1. University Technology Acrobatics Group\n2. University Technology Accountant Group\n3. University Technology Assisant Group", "3"),
         Bodies.rectangle(1850+451/2*0.5, 570-284/2*0.5, 451*0.5, 284*0.5, {
@@ -64,6 +98,7 @@ buildMap.build = (composite, world) => {
         buildMap.createPlatform(2500, 580 - 80 - 80 - 70, 200, 10), //H
         // F1R3
         buildMap.createPlatform(2850, 580, 10, 80), //V
+        buildMap.createPlatform(2850, 550, 80, 10), //H
         buildMap.createPlatform(3000, 580 - 80, 10, 150 + 10), //V
         buildMap.createPlatform(2800, 580 - 80 - 80 - 70, 200, 10), //H
         // F1R4
@@ -111,7 +146,7 @@ buildMap.build = (composite, world) => {
                 mask: 0x0001
             }
         }),
-        Bodies.rectangle(3650, 225, 145 * 0.5, 145 * 0.5, {
+        Bodies.rectangle(3650, 215, 145 * 0.5, 145 * 0.5, {
             isStatic: true,
             isSensor: true,
             bodyType: "donut",
@@ -263,7 +298,7 @@ buildMap.build = (composite, world) => {
         buildMap.createPlatform(10900, 550, 70, 10),
         buildMap.createPlatform(10910, 570, 10, 20),
         buildMap.createPlatform(10950, 570, 10, 20),
-        Bodies.rectangle(10935, 475, 145 * 0.5, 145 * 0.5, {
+        Bodies.rectangle(10935, 465, 145 * 0.5, 145 * 0.5, {
             isStatic: true,
             bodyType: "donut",
             isSensor: true,
