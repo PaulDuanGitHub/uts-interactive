@@ -688,12 +688,8 @@ export class MyComponent extends Component {
 	}
 
 	componentDidMount = () => {
-		// this.renderCanvas()
-		this.nameInput.current.value = "Paul"
-		// if(this.state.player != undefined) {
-		// 	window.location.reload();
-		// }
-		this.joinGame()
+		// this.nameInput.current.value = "Paul"
+		// this.joinGame()
 		this.timerInterval = setInterval(()=>{
 			if(this.state.startTime != undefined) {
 				const d = new Date(Date.UTC(0,0,0,0,0,0,Date.now() - this.state.startTime))
