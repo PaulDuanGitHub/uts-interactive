@@ -11,6 +11,8 @@ import checkPointURL from './assets/map/checkpoint3.png'
 import bookingsURL from './assets/map/Bookings.png'
 import sharepointURL from './assets/map/SharePoint.png'
 import resetURL from './assets/map/lobby/reset.png'
+import rightURL from './assets/map/question_right.png'
+import wrongURL from './assets/map/question_wrong.png'
 import buildMap from './buildMap.js';
 
 export class MyComponent extends Component {
@@ -37,15 +39,15 @@ export class MyComponent extends Component {
 		socket: io.connect(isSocket ? "https://api.paulduan.tk/" : "http://127.0.0.1:8888/", isSocket ? { path: '/uts-interactive/socket.io' } : {}),
 		player: Matter.Bodies.rectangle(200, 200, 80, 80, { inertia: Infinity }),
 		other_player: {},
-		willBounce: [false,0],
+		willBounce: [false, 0],
 		players: 0,
 		gate: undefined,
 		// startTime:0,
 		// spawnPoint: { x: 10700, y: 300 } // Sheridan
-		// spawnPoint: { x: 2300, y: 300 } // BSB
+		spawnPoint: { x: 7630, y: 300 } // BSB
 		// spawnPoint: { x: 3500, y: 300 } // 248
 		// spawnPoint: { x: 5727, y: 530 } // Bee
-		spawnPoint: { x: 600, y: 400 }
+		// spawnPoint: { x: 600, y: 400 }
 		// springs: []
 	}
 
@@ -62,8 +64,11 @@ export class MyComponent extends Component {
 			// console.log(key.code, this.state.onGround);
 			if (key.code.includes(event.keyCode)) {
 				if (key.isUp && key.press) {
+					if(this.state.player.sleeping) {
+						return
+					}
 					// alert(event.keyCode, event.keyCode in [38,87])
-					if (event.keyCode === 38 || event.keyCode === 87) {
+					if ((event.keyCode === 38 || event.keyCode === 87) && this.state.player.name != undefined) {
 						if (this.state.onGround) {
 							key.press();
 						}
@@ -115,26 +120,47 @@ export class MyComponent extends Component {
 
 	registerSocketListener = () => {
 		this.state.socket.on("ok", (data) => {
-			let boxC = this.Bodies.rectangle(this.state.spawnPoint.x, this.state.spawnPoint.y, 25, 63, {
-				inertia: Infinity,
-				render: {
-					lineWidth: 0
+			if (data.name == undefined) {
+				let boxC = this.Bodies.rectangle(this.state.spawnPoint.x, this.state.spawnPoint.y, 25, 63, {
+					inertia: Infinity,
+					isStatic: true,
+					collisionFilter: {
+						group:-1,
+						category: 0x0002,
+						mask: 0x0001
+					},
+					uuid:data.uuid,
+					render: {
+						visible:false
+					}
+				})
+				this.setState({ player: boxC }, () => {
+					Matter.World.add(this.engine.world, boxC)
+					this.state.socket.emit("joined", { name: boxC.name, uuid: boxC.uuid, position: boxC.position, velocity: boxC.velocity })
+				})
+
+			} else {
+				let boxC = this.Bodies.rectangle(this.state.spawnPoint.x, this.state.spawnPoint.y, 25, 63, {
+					inertia: Infinity,
+					render: {
+						lineWidth: 0
+					}
+				})
+				console.log("北京正常", boxC);
+				boxC.bodyType = "player"
+				boxC.uuid = data.uuid
+				boxC.name = data.name
+				boxC.friction = 0
+				boxC.frictionAir = 0
+				boxC.collisionFilter = {
+					category: 0x0002,
+					mask: 0x0001
 				}
-			})
-			console.log("北京正常", boxC);
-			boxC.bodyType = "player"
-			boxC.uuid = data.uuid
-			boxC.name = data.name
-			boxC.friction = 0
-			boxC.frictionAir = 0
-			boxC.collisionFilter = {
-				category: 0x0002,
-				mask: 0x0001
+				this.setState({ player: boxC }, () => {
+					Matter.World.add(this.engine.world, boxC)
+					this.state.socket.emit("joined", { name: boxC.name, uuid: boxC.uuid, position: boxC.position, velocity: boxC.velocity })
+				})
 			}
-			this.setState({ player: boxC }, () => {
-				Matter.World.add(this.engine.world, boxC)
-				this.state.socket.emit("joined", { name: boxC.name, uuid: boxC.uuid, position: boxC.position, velocity: boxC.velocity })
-			})
 		})
 
 		this.state.socket.on("update", (data) => {
@@ -177,7 +203,9 @@ export class MyComponent extends Component {
 				}
 			})
 			this.setState({ other_player: new_other_player, players: Object.keys(data['users']).length }, () => {
-				this.pushMessage(data["joinedPlayerName"])
+				if(data["joinedPlayerName"] != undefined) {
+					this.pushMessage(data["joinedPlayerName"])
+				}
 			})
 		})
 
@@ -190,6 +218,7 @@ export class MyComponent extends Component {
 					Matter.Body.setPosition(this.state.other_player[player], position)
 					Matter.Body.setVelocity(this.state.other_player[player], velocity)
 					this.state.other_player[player].powered = data[player].powered
+					this.state.other_player[player].sleeping = data[player].sleeping
 				}
 			}
 		})
@@ -214,9 +243,9 @@ export class MyComponent extends Component {
 			// alert('')
 			this.rankingList.current.innerHTML = ""
 			console.log(data);
-			data.forEach((result,index) => {
+			data.forEach((result, index) => {
 				var li = document.createElement("div");
-				const d = new Date(Date.UTC(0,0,0,0,0,0,result.result))
+				const d = new Date(Date.UTC(0, 0, 0, 0, 0, 0, result.result))
 				// Pull out parts of interest
 				var parts = [
 					d.getUTCMinutes(),
@@ -224,10 +253,10 @@ export class MyComponent extends Component {
 					d.getMilliseconds(),
 				]
 				var nameSpan = document.createElement("span")
-				nameSpan.appendChild(document.createTextNode(index+1+" "+result.name))
+				nameSpan.appendChild(document.createTextNode(index + 1 + " " + result.name))
 				nameSpan.style.color = "blue"
 				li.appendChild(nameSpan)
-				li.appendChild(document.createTextNode(`: ${parts[0]+"m "+String(parts[1]).padStart(2,'0')+"s "+String(parts[2]).padStart(3,'0')+"ms"}`));
+				li.appendChild(document.createTextNode(`: ${parts[0] + "m " + String(parts[1]).padStart(2, '0') + "s " + String(parts[2]).padStart(3, '0') + "ms"}`));
 				li.style.textAlign = "left"
 				this.rankingList.current.appendChild(li)
 			})
@@ -235,9 +264,9 @@ export class MyComponent extends Component {
 	}
 
 	bindKeys = () => {
-		this.left = this.keyboard([37,65])
-		this.up = this.keyboard([38,87])
-		this.right = this.keyboard([39,68])
+		this.left = this.keyboard([37, 65])
+		this.up = this.keyboard([38, 87])
+		this.right = this.keyboard([39, 68])
 		let speed = 4
 		let jumpForce = 0.04
 		this.left.press = () => {
@@ -272,6 +301,56 @@ export class MyComponent extends Component {
 
 		this.up.release = () => {
 
+		}
+	}
+
+	bindSpectatorKeys = () => {
+		this.left = this.keyboard([37, 65])
+		this.up = this.keyboard([38, 87])
+		this.right = this.keyboard([39, 68])
+		this.down = this.keyboard([83, 40])
+
+		var moveSpeedH = 5
+		var moveSpeedV = 2
+
+		this.left.press = () => {
+			Matter.Body.setPosition(this.state.player,{x:this.state.player.position.x-moveSpeedH, y:this.state.player.position.y})
+		}
+
+		this.left.release = () => {
+			if (!this.right.isDown) {
+				Matter.Body.setVelocity(this.state.player, Matter.Vector.create(0, this.state.player.velocity.y))
+			}
+		}
+
+		this.right.press = () => {
+			Matter.Body.setPosition(this.state.player,{x:this.state.player.position.x+moveSpeedH, y:this.state.player.position.y})
+		}
+
+		this.right.release = () => {
+			if (!this.left.isDown) {
+				Matter.Body.setVelocity(this.state.player, Matter.Vector.create(0, this.state.player.velocity.y))
+			}
+		}
+
+		this.up.press = () => {
+			Matter.Body.setPosition(this.state.player,{x:this.state.player.position.x, y:this.state.player.position.y-moveSpeedV})
+		}
+
+		this.up.release = () => {
+			if (!this.left.isDown) {
+				Matter.Body.setVelocity(this.state.player, Matter.Vector.create(this.state.player.velocity.y, 0))
+			}
+		}
+
+		this.down.press = () => {
+			Matter.Body.setPosition(this.state.player,{x:this.state.player.position.x, y:this.state.player.position.y+moveSpeedV})
+		}
+
+		this.down.release = () => {
+			if (!this.left.isDown) {
+				Matter.Body.setVelocity(this.state.player, Matter.Vector.create(this.state.player.velocity.y, 0))
+			}
 		}
 	}
 
@@ -340,18 +419,17 @@ export class MyComponent extends Component {
 			this.createPlatform(700, 200),
 			this.createPlatform(50, 200),
 			this.createPlatform(845, 245),
-			// this.createPlatform(375, 430, undefined, undefined, 0.8, "spring"), // spring
-			this.Bodies.rectangle(375,430,80,10, {
-				bodyType:"spring",
-				fspring:-0.08,
+			this.Bodies.rectangle(375, 430, 80, 10, {
+				bodyType: "spring",
+				fspring: -0.08,
 				isStatic: true,
 				render: {
 					fillStyle: "orange"
 				}
 			}),
 			this.createCheckPoint(80, 155),
-			this.createCheckPoint(1280, 550,true),
-			this.Bodies.rectangle(1220+808/2*0.5, 475, 808 * 0.5, 64 * 0.5, {
+			this.createCheckPoint(1280, 550, true),
+			this.Bodies.rectangle(1220 + 808 / 2 * 0.5, 475, 808 * 0.5, 64 * 0.5, {
 				isStatic: true,
 				render: {
 					lineWidth: 1,
@@ -373,6 +451,9 @@ export class MyComponent extends Component {
 			this.createCheckPoint(3750, 300),
 			this.createCheckPoint(4265, 50),
 			this.createCheckPoint(5600, 530),
+			this.createCheckPoint(9790, 530),
+			this.createCheckPoint(8306, 530),
+			this.createCheckPoint(10510, 530),
 
 			this.Bodies.rectangle(1400, 600, 50, 50, {
 				isStatic: true,
@@ -404,28 +485,9 @@ export class MyComponent extends Component {
 					}
 				}
 			}),
-			// this.createPlatform(1800, 580, 800,undefined,undefined,undefined,undefined,true),
-			// this.Bodies.rectangle((2500+250/2), 375, 443,425, {
-			// 	isStatic: true,
-			// 	render: {
-			// 		lineWidth:1,
-			// 		sprite: {
-			// 			texture: GoJiraURL,
-			// 			xOffset: 0,
-			// 			yOffset: 0,
-			// 		}
-			// 	}
-			// }),
-			// [this.createPlatform(1900, 525),
-			// this.createPlatform(2000, 450),
-			// this.createPlatform(2100, 375),
-			// this.createPlatform(2200, 300),
-			// this.createPlatform(2300, 225),
-			// this.createPlatform(2400, 150),
-			// this.createPlatform(2500, 75)]
 
 		])
-		this.Composite.add(this.engine.world, [Matter.Bodies.rectangle(600, 175, 733*0.6, 451*0.6, {
+		this.Composite.add(this.engine.world, [Matter.Bodies.rectangle(600, 175, 733 * 0.6, 451 * 0.6, {
 			isStatic: true,
 			render: {
 				sprite: {
@@ -462,20 +524,20 @@ export class MyComponent extends Component {
 				if (pair.bodyA === this.state.player) {
 					if (pair.bodyB.bodyType === "spring") {
 						console.log('test')
-						this.setState({ willBounce: [true,pair.bodyB.fspring] })
+						this.setState({ willBounce: [true, pair.bodyB.fspring] })
 					}
 					if (pair.bodyB.bodyType === "checkpoint") {
 						this.setState({ spawnPoint: pair.bodyB.position })
 						// alert(pair.bodyB.position)
 						if (pair.bodyB.isStart && this.state.startTime === undefined) {
-							this.setState({startTime:Date.now()})
+							this.setState({ startTime: Date.now() })
 						}
 						if (pair.bodyB.isFinal && this.state.startTime !== undefined) {
 							this.arrive()
 						}
 					}
 					if (pair.bodyB.bodyType === "donut") {
-						if(this.state.player.powered != true) {
+						if (this.state.player.powered != true) {
 							this.state.player.powered = true
 							var countdown = 10
 							var timer = setInterval(() => {
@@ -483,7 +545,7 @@ export class MyComponent extends Component {
 									clearInterval(timer)
 									this.state.player.powered = false
 								}
-								countdown --
+								countdown--
 							}, 1000)
 						}
 					}
@@ -492,57 +554,92 @@ export class MyComponent extends Component {
 						const a = pair.bodyB.answer
 						var answer = prompt(q)
 
-						var event = new KeyboardEvent("keyup",{keyCode:37})
+						var event = new KeyboardEvent("keyup", { keyCode: 37 })
 						window.dispatchEvent(event)
-						event = new KeyboardEvent("keyup",{keyCode:38})
+						event = new KeyboardEvent("keyup", { keyCode: 38 })
 						window.dispatchEvent(event)
-						event = new KeyboardEvent("keyup",{keyCode:39})
+						event = new KeyboardEvent("keyup", { keyCode: 39 })
 						window.dispatchEvent(event)
-						
-						Matter.Body.setVelocity(this.state.player, {x:0,y:0})
+
+						Matter.Body.setVelocity(this.state.player, { x: 0, y: 0 })
 						console.log(this.state.player.velocity);
 					}
 				} else if (pair.bodyB === this.state.player) {
 					if (pair.bodyA.bodyType === "spring") {
-						this.setState({ willBounce: [true,pair.bodyA.fspring] })
+						this.setState({ willBounce: [true, pair.bodyA.fspring] })
 					}
 					if (pair.bodyA.bodyType === "checkpoint") {
 						this.setState({ spawnPoint: pair.bodyA.position })
 						// alert(pair.bodyB.position.x+","+pair.bodyB.position.y)
 						if (pair.bodyA.isStart && this.state.startTime === undefined) {
-							this.setState({startTime:Date.now()})
+							this.setState({ startTime: Date.now() })
 						}
 						if (pair.bodyA.isFinal && this.state.startTime !== undefined) {
 							this.arrive()
 						}
 					}
 					if (pair.bodyA.bodyType === "donut") {
-						if(this.state.player.powered != true) {
+						if (this.state.player.powered != true) {
 							this.state.player.powered = true
 							var countdown = 10
-							var timer = setInterval(() => {
+							var repeat = () => {
+								this.state.player.poweredLeft = countdown
 								if (countdown == 0) {
 									clearInterval(timer)
+									this.state.player.poweredLeft = undefined
 									this.state.player.powered = false
 								}
-								countdown --
-							}, 1000)
+								countdown--
+								return repeat
+							}
+							var timer = setInterval(repeat(), 1000)
 						}
 					}
 					if (pair.bodyA.bodyType === "question") {
 						const q = pair.bodyA.question
 						const a = pair.bodyA.answer
-						var answer = prompt(q)
-
-						var event = new KeyboardEvent("keyup",{keyCode:37})
-						window.dispatchEvent(event)
-						event = new KeyboardEvent("keyup",{keyCode:38})
-						window.dispatchEvent(event)
-						event = new KeyboardEvent("keyup",{keyCode:39})
-						window.dispatchEvent(event)
-
-						Matter.Body.setVelocity(this.state.player, {x:0,y:0})
-						console.log(this.state.player.velocity);
+						if(!pair.bodyA.answered){
+							var answer = prompt(q)
+							if(answer != undefined){
+								answer = answer.trim()
+								if (answer.endsWith('.')){
+									answer = answer.substring(0,answer.length-1)
+								}
+								Matter.Body.setVelocity(this.state.player, {x:0,y:0})
+								if(answer === a) {
+									pair.bodyA.render.sprite.texture = rightURL
+									pair.bodyA.answered = true
+	
+								}else {
+									pair.bodyA.render.sprite.texture = wrongURL
+									this.state.player.sleeping = true
+									var countdown = 5
+									Matter.Body.setVelocity(this.state.player, {x:0,y:0})
+									var repeat = () => {
+										this.state.player.sleepingLeft = countdown
+										if (countdown == 0) {
+											clearInterval(timer)
+											this.state.player.sleepingLeft = undefined
+											this.state.player.sleeping = false
+										}
+										countdown--
+										return repeat
+									}
+									var timer = setInterval(repeat(), 1000)
+								}
+							}
+							
+							Matter.Body.setPosition(this.state.player, {x:this.state.player.position.x-8,y:this.state.player.position.y})
+							var event = new KeyboardEvent("keyup", { keyCode: 37 })
+							window.dispatchEvent(event)
+							event = new KeyboardEvent("keyup", { keyCode: 38 })
+							window.dispatchEvent(event)
+							event = new KeyboardEvent("keyup", { keyCode: 39 })
+							window.dispatchEvent(event)
+	
+							Matter.Body.setVelocity(this.state.player, { x: 0, y: 0 })
+							console.log(this.state.player.velocity);
+						}
 
 					}
 				}
@@ -555,12 +652,12 @@ export class MyComponent extends Component {
 				if (pair.bodyA === this.state.player) {
 					if (pair.bodyB.bodyType === "spring") {
 						console.log('test3')
-						this.setState({ willBounce: [false,pair.bodyB.fspring] })
+						this.setState({ willBounce: [false, pair.bodyB.fspring] })
 					}
 				} else if (pair.bodyB === this.state.player) {
 					if (pair.bodyA.bodyType === "spring") {
 						console.log('test4')
-						this.setState({ willBounce: [false,pair.bodyA.fspring] })
+						this.setState({ willBounce: [false, pair.bodyA.fspring] })
 					}
 				}
 			})
@@ -585,12 +682,12 @@ export class MyComponent extends Component {
 
 		Matter.Events.on(this.myRender, 'afterRender', (event) => {
 			// if (this.state.player != undefined && (Math.abs(this.state.player.velocity.x) > 1.137 || Math.abs(this.state.player.velocity.y) > 1.137)) {
-			if (this.state.player != undefined) {
+			if (this.state.player != undefined && this.state.player.name != undefined) {
 				// console.log(this.state.player);
 				console.log();
 				if (true) {
 					// console.log(this.state.player.velocity);
-					this.state.socket.emit("moving", { uuid: this.state.player.uuid, position: this.state.player.position, velocity: this.state.player.velocity, name: this.state.player.name, powered: this.state.player.powered })
+					this.state.socket.emit("moving", { uuid: this.state.player.uuid, position: this.state.player.position, velocity: this.state.player.velocity, name: this.state.player.name, powered: this.state.player.powered,sleeping:this.state.player.sleeping })
 				}
 			}
 			this.Render.lookAt(this.myRender, this.state.player, {
@@ -602,10 +699,10 @@ export class MyComponent extends Component {
 	}
 
 	createPlatform = (x, y, width = 80, height = 10, restitution = 0, bodyType = "", name = undefined, alignHead = false) => {
-		if(alignHead) {
-			x += width/2
+		if (alignHead) {
+			x += width / 2
 		}
-		return this.Bodies.rectangle(x, y, width, height, { isStatic: true, "restitution": restitution, "bodyType": bodyType, "name": name, fspring:bodyType==="spring" ? -0.08:0 })
+		return this.Bodies.rectangle(x, y, width, height, { isStatic: true, "restitution": restitution, "bodyType": bodyType, "name": name, fspring: bodyType === "spring" ? -0.08 : 0 })
 	}
 
 	createRotatedPlat = (x, y, width = 100, height = 10) => {
@@ -621,7 +718,7 @@ export class MyComponent extends Component {
 	}
 
 	createCheckPoint = (x, y, isStart) => {
-		var checkpoint = this.Bodies.rectangle(x, y, 287*0.5, 184*0.5, {
+		var checkpoint = this.Bodies.rectangle(x, y, 287 * 0.5, 184 * 0.5, {
 			isSensor: true,
 			isStatic: true,
 			'bodyType': "checkpoint",
@@ -643,14 +740,14 @@ export class MyComponent extends Component {
 	arrive = () => {
 		var result = Date.now() - this.state.startTime
 		clearInterval(this.timerInterval)
-		if(this.state.player.finished !== true){
-			this.state.socket.emit("arrive", { 
-				name: this.state.player.name, 
+		if (this.state.player.finished !== true) {
+			this.state.socket.emit("arrive", {
+				name: this.state.player.name,
 				uuid: this.state.player.uuid,
 				result: result
 			})
 		}
-		this.state.player.finished  = true
+		this.state.player.finished = true
 	}
 
 	joinGame = () => {
@@ -664,6 +761,14 @@ export class MyComponent extends Component {
 		} else {
 			alert("Please enter your name before join the game!")
 		}
+	}
+
+	spectateGame = () => {
+		this.bindSpectatorKeys()
+		this.setState({ joined: true }, () => {
+			this.renderCanvas()
+			this.registerSocketListener()
+		})
 	}
 
 	resetPos = () => {
@@ -690,9 +795,9 @@ export class MyComponent extends Component {
 	componentDidMount = () => {
 		// this.nameInput.current.value = "Paul"
 		// this.joinGame()
-		this.timerInterval = setInterval(()=>{
-			if(this.state.startTime != undefined) {
-				const d = new Date(Date.UTC(0,0,0,0,0,0,Date.now() - this.state.startTime))
+		this.timerInterval = setInterval(() => {
+			if (this.state.startTime != undefined) {
+				const d = new Date(Date.UTC(0, 0, 0, 0, 0, 0, Date.now() - this.state.startTime))
 				// Pull out parts of interest
 				var parts = [
 					d.getUTCMinutes(),
@@ -701,7 +806,7 @@ export class MyComponent extends Component {
 				]
 				// Zero-pad
 				// formatted = parts.map(s => String(s).padStart(2,'0')).join(':');
-				this.timer.current.innerHTML = parts[0]+"m "+String(parts[1]).padStart(2,'0')+"s "+String(parts[2]).padStart(3,'0')+"ms"
+				this.timer.current.innerHTML = parts[0] + "m " + String(parts[1]).padStart(2, '0') + "s " + String(parts[2]).padStart(3, '0') + "ms"
 			}
 		})
 	}
@@ -719,14 +824,16 @@ export class MyComponent extends Component {
 					<Col>
 						<Row className='justify-content-start'>
 							<button onClick={this.joinGame} style={{ width: '100px' }} type="button" className="btn btn-primary">Join Game</button>
+							<button onClick={this.spectateGame} style={{ width: '150px', marginLeft:"25px" }} type="button" className="btn btn-primary">Spectator Game</button>
 						</Row>
+						
 					</Col>
 				</Row>
 				<Row className=''>
 					<div style={{ marginTop: "20px", marginBottom: "20px" }}>Welcome to UTS Interactive Game <span style={{ fontWeight: "bold", color: 'Blue' }}>{this.state.player.name}</span>!<span> Your time: <span ref={this.timer}>00m 00s 000ms</span></span></div>
 				</Row>
 				<div style={{ position: 'relative', display: this.state.joined ? '' : 'none' }}>
-					
+
 				</div>
 				<Row style={{ display: this.state.joined ? '' : 'none' }}>
 					<Col style={{ border: "1px ridge black" }}>
@@ -734,9 +841,9 @@ export class MyComponent extends Component {
 						<div ref={this.messageList}>
 						</div>
 					</Col>
-					<Col style={{ border: "1px ridge black",position:"relative", padding:"0"}}>
+					<Col style={{ border: "1px ridge black", position: "relative", padding: "0" }}>
 						<div id="game-canvas" style={{ height: "600px", width: "900px" }} ref={this.gameCanvas}></div>
-						<button ref={this.resetBtn} onClick={this.resetPos} className="btn btn-primary shadow-none" style={{ fontSize: '25px', lineHeight: '0.8', paddingBottom: "10px", position: 'absolute', top: "20px", left: `20px`, borderl: 'none', opacity:"80%" }}>⟳</button>
+						<button ref={this.resetBtn} onClick={this.resetPos} className="btn btn-primary shadow-none" style={{ fontSize: '25px', lineHeight: '0.8', paddingBottom: "10px", position: 'absolute', top: "20px", left: `20px`, borderl: 'none', opacity: "80%" }}>⟳</button>
 					</Col>
 					<Col style={{ border: "1px ridge black" }}>
 						Ranking:

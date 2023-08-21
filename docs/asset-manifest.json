@@ -1,20 +1,20 @@
 {
   "files": {
     "main.css": "/uts-interactive/static/css/main.0fb90981.css",
-    "main.js": "/uts-interactive/static/js/main.42656087.js",
+    "main.js": "/uts-interactive/static/js/main.123592eb.js",
     "static/js/787.a82904e7.chunk.js": "/uts-interactive/static/js/787.a82904e7.chunk.js",
     "static/media/congras.png": "/uts-interactive/static/media/congras.f208948dcc24cbdda69d.png",
     "static/media/book.png": "/uts-interactive/static/media/book.ffcfe39f4265bb5e56bb.png",
     "static/media/utag.png": "/uts-interactive/static/media/utag.66949d0aba12f6734055.png",
     "static/media/m.png": "/uts-interactive/static/media/m.9421276f8b9e7b0f6b44.png",
     "static/media/s.png": "/uts-interactive/static/media/s.ae83d78069c63f352e8f.png",
-    "static/media/GoJira.png": "/uts-interactive/static/media/GoJira.2367bd65b675f56f5d98.png",
+    "static/media/GoJira.png": "/uts-interactive/static/media/GoJira.f2fde550c43df2ae8ca2.png",
     "static/media/title.png": "/uts-interactive/static/media/title.f0446e2bd673b0d46b9e.png",
     "static/media/scene1.png": "/uts-interactive/static/media/scene1.5bfb0c5d031a38c70db4.png",
+    "static/media/Sheridan.png": "/uts-interactive/static/media/Sheridan.126c3e68d7b9f71b374a.png",
     "static/media/transformative.png": "/uts-interactive/static/media/transformative.2fb2c1133000ea37ac33.png",
     "static/media/seamless.png": "/uts-interactive/static/media/seamless.3df6ba2b4f6231ab96bb.png",
     "static/media/ribbon-cut.png": "/uts-interactive/static/media/ribbon-cut.cddddc559e856402dc5a.png",
-    "static/media/Sheridan.png": "/uts-interactive/static/media/Sheridan.5786f2433926eda50e45.png",
     "static/media/connected.png": "/uts-interactive/static/media/connected.e54c7b9bfaa61a2853f1.png",
     "static/media/control.png": "/uts-interactive/static/media/control.823075c2faf3fce42ecf.png",
     "static/media/donut.png": "/uts-interactive/static/media/donut.81ae68287b503a370491.png",
@@ -25,11 +25,11 @@
     "static/media/logo.svg": "/uts-interactive/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
     "index.html": "/uts-interactive/index.html",
     "main.0fb90981.css.map": "/uts-interactive/static/css/main.0fb90981.css.map",
-    "main.42656087.js.map": "/uts-interactive/static/js/main.42656087.js.map",
+    "main.123592eb.js.map": "/uts-interactive/static/js/main.123592eb.js.map",
     "787.a82904e7.chunk.js.map": "/uts-interactive/static/js/787.a82904e7.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.0fb90981.css",
-    "static/js/main.42656087.js"
+    "static/js/main.123592eb.js"
   ]
 }

@@ -56,6 +56,7 @@ io.on('connection', (socket) => {
             users[data.uuid].position = data.position
             users[data.uuid].velocity = data.velocity
             users[data.uuid].powered = data.powered
+            users[data.uuid].sleeping = data.sleeping
             // console.log(data.name, " is moving, position:", data.position, " velocity: ",data.velocity, Object.values(users));
             var updatePack = {}
             updatePack[data.uuid] = users[data.uuid]

@@ -5,6 +5,8 @@ import pianoURL from "./assets/map/piano.png"
 import speakerURL from "./assets/map/speaker.png"
 import beeURL from "./assets/map/bee.png"
 import headURL from "./assets/map/head.png"
+import LIVELabURL from "./assets/map/LIVELab.png"
+import GreenHouseURL from "./assets/map/Biology Greenhouse.png"
 import cactus1URL from "./assets/map/cactus.png"
 import cactus2URL from "./assets/map/cactus2.png"
 import cactus3URL from "./assets/map/cactus3.png"
@@ -27,7 +29,9 @@ import congras from "./assets/map/congras.png"
 import crowd from "./assets/map/crowd.png"
 import ribbon from "./assets/map/ribbon-cut.png"
 import bsb from "./assets/map/bsb.png"
+import mills from "./assets/map/mills.png"
 import control from "./assets/map/lobby/control.png"
+import MMAURL from "./assets/map/MMA.png"
 
 var buildMap = {}
 buildMap.build = (composite, world) => {
@@ -69,9 +73,12 @@ buildMap.build = (composite, world) => {
                 mask: 0x0001
             }
         }),
-        buildMap.createQuestion(1033, 160, "1 + 1 = ?:\n1. 1\n2. 2\n3. 3", "2"),
+        buildMap.createQuestion(700, 590, "What is UTS's full name?\n\nPlease only enter a sigle number:\n1. University Technology Services\n2. University of Technology Sydney\n3. Unix Time Stamp", "1"),
         // Questions
-        buildMap.createQuestion(2344, 308, "What is UTAG's full name:\n1. University Technology Acrobatics Group\n2. University Technology Accountant Group\n3. University Technology Assisant Group", "3"),
+        buildMap.createQuestion(2344, 340, "What is UTAG's full name?:\n1. University Technology Acrobatics Group\n2. University Technology Accountant Group\n3. University Technology Assisant Group", "3"),
+        buildMap.createQuestion(6500, 430, "What is the human hearing range?\n1. 0 to 20,000Hz\n2. 20 to 20,000Hz\n3. 200 to 200,000Hz", "2"),
+        buildMap.createQuestion(7200, 430, "What is the family of cactus?\n1. Dinosauria\n2. Caryophyllales\n3. Cactaceae", "3"),
+        buildMap.createQuestion(10160, 570, "What is the right order of UTS values\n1. Seamless Transformative Connected\n2. Connected Transformatvie Seamless\n3. Connected Seamless Transformative", "3"),
         Bodies.rectangle(1850+451/2*0.5, 570-284/2*0.5, 451*0.5, 284*0.5, {
             isStatic:true,
             render:{
@@ -106,7 +113,7 @@ buildMap.build = (composite, world) => {
         buildMap.createPlatform(3100, 580 - 130, 10, 100), //V
         buildMap.createPlatform(3100, 580 - 80 - 80 - 70, 200, 10), //H
         buildMap.createPlatform(3000, 580 - 80 - 80 - 70 + 80, 100, 10), //H
-        buildMap.createBox(3200, 580),
+        buildMap.createBox(3200, 570),
         // F1R5
         buildMap.createBouncyPlatform(3450, 560, undefined, undefined, -0.05), //H
         buildMap.createPlatform(3300, 580 - 80 - 50), //H
@@ -121,7 +128,7 @@ buildMap.build = (composite, world) => {
         // F1R7
         buildMap.createPlatform(4300, 580 - 80 - 70, 80, 10), //H
         buildMap.createPlatform(4430, 580 - 80 - 80 - 70, 80, 10), //H
-        buildMap.createBox(4400, 580, 70, 70),
+        buildMap.createBox(4400, 570, 70, 70),
         // F2R1
         buildMap.createPlatform(4250, 340, 10, 80), // V
         buildMap.createPlatform(4100, 340, 10, 150), // V
@@ -245,6 +252,7 @@ buildMap.build = (composite, world) => {
         buildMap.createPlatform(6310, 350, 50, 75, { url: speakerURL, xScale: 1, yScale: 1 }), // H
         buildMap.createPlatform(6410, 350, 50, 75, { url: speakerURL, xScale: 1, yScale: 1 }), // H
         buildMap.createPlatform(6380, 570, 120, 115, { url: pianoURL, xScale: 1, yScale: 1 }), // H
+        buildMap.createPlatform(5800, 265, 292, 48, { url: LIVELabURL, xScale: 1, yScale: 1 }), // H
         buildMap.createPlatform(6300, 525, 50, 10), // H
         // Green House
         buildMap.createPlatform(6600, 280 + 50, 10, 50), // V
@@ -254,13 +262,30 @@ buildMap.build = (composite, world) => {
         buildMap.createPlatform(6500, 440, 100, 10), // H
         buildMap.createPlatform(6600, 580, 1800, 10), // H Floor
         buildMap.createPlatform(6600, 280, 710, 10), // H Ceiling
+        buildMap.createPlatform(6600, 265, 417, 47, { url:GreenHouseURL, xScale:1, yScale:1}), 
 
         buildMap.createBouncyPlatform(6650, 570, 184, 102, -0.05, { url: cactus1URL, xScale: 1, yScale: 1 }),
         buildMap.createBouncyPlatform(6900, 570, 106, 82, -0.05, { url: cactus2URL, xScale: 1, yScale: 1 }),
         buildMap.createBouncyPlatform(7100, 570, 115, 80, -0.05, { url: cactus3URL, xScale: 1, yScale: 1 }),
 
+        Bodies.rectangle(7400+451/2*0.5, 570-284/2*0.5, 451*0.5, 284*0.5, {
+            isStatic:true,
+            render:{
+                sprite:{
+                    texture:mills,
+                    xScale:0.5,
+                    yScale:0.5
+                }
+            },
+            collisionFilter: {
+                category: 0x0002,
+                mask: 0x0001
+            }
+        }),
+
         buildMap.createPlatform(7200, 440, 100, 10), // H
-        buildMap.createPlatform(7600, 350, 10, 10, { url: bookURL, xScale: 1, yScale: 1 }), // H
+        buildMap.createPlatform(7600, 300, 10, 10, { url: bookURL, xScale: 1, yScale: 1 }), // H
+        // buildMap.createPlatform(7950, 200, 558, 57, { url: MMAURL, xScale: 1, yScale: 1 }), // H
         buildMap.createPlatform(8000, 350, 10, 10, { url: sURL, xScale: 1, yScale: 1 }), // H
         buildMap.createPlatform(8200, 350, 10, 10, { url: mURL, xScale: 1, yScale: 1 }), // H
 
@@ -476,22 +501,24 @@ buildMap.createBox = (x, y, width = 50, height = 50) => {
     return Bodies.rectangle(x, y, width, height, {
         render:{
             fillStyle:"gray"
-        }
+        },
+        isStatic:true
     })
 }
 
 buildMap.createQuestion = (x, y, q, a) => {
-    var question = Bodies.rectangle(x, y, 20, 20, {
+    var question = Bodies.rectangle(x+106*0.5, y-50, 106*0.5, 100, {
         isSensor: true,
         isStatic: true,
         bodyType: "question",
         question: q,
         answer: a,
+        answered: false,
         render: {
             sprite: {
                 texture: questionURL,
                 xOffset: 0,
-                yOffset: 0,
+                yOffset: -0.4,
                 xScale: 0.5,
                 yScale: 0.5
             }

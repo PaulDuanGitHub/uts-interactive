@@ -14,6 +14,7 @@ import player128_leftURL_powered from "./assets/player/player128_left_powered.pn
 import player128_rightURL_powered from "./assets/player/player128_right_powered.png"
 import player128_standURL_powered from "./assets/player/player128_stand_powered.png"
 import player128_jumpURL_powered from "./assets/player/player128_jump_powered.png"
+import player128_sleepURL from "./assets/player/player128_sleep.png"
 
 var MyRender = {};
 export default MyRender;
@@ -51,6 +52,8 @@ export default MyRender;
     const player128_jump_powered = new Image()
     const player128_left_powered = new Image()
     const player128_right_powered = new Image()
+    const player128_sleep = new Image()
+
 
     player128_stand.src = player128_standURL;
     player128_jump.src = player128_jumpURL;
@@ -59,7 +62,8 @@ export default MyRender;
     player128_stand_powered.src = player128_standURL_powered;
     player128_jump_powered.src = player128_jumpURL_powered;
     player128_left_powered.src = player128_leftURL_powered;
-    player128_right_powered.src = player128_rightURL_powered
+    player128_right_powered.src = player128_rightURL_powered;
+    player128_sleep.src = player128_sleepURL;
     MyRender.create = function (options) {
 
         var defaults = {
@@ -849,7 +853,29 @@ export default MyRender;
                                 c.strokeStyle = part.render.strokeStyle;
                                 // c.stroke();
                             }
-                            if (Math.abs(part.velocity.y) > 1.15) {
+                            if (part.sleeping === true) {
+                                const w = 74;
+                                const h = 75;
+                                // console.log((~~(time/1000 % 6)),offset);
+                                const { x, y } = part.position;
+                                c.drawImage(
+                                    player128_sleep,      // image
+                                    0,     // sx
+                                    0,         // sy
+                                    w,          // sWidth
+                                    h,          // sHeight
+                                    x - w / 2,  // dx
+                                    y - h / 2,  // dy
+                                    w,          // dWidth
+                                    h           // dHeight
+                                );
+                                if(part.sleepingLeft !== undefined) {
+                                    c.font = "24px Arial";
+                                    c.fillStyle = "black"
+                                    c.textAlign = "center";
+                                    c.fillText(part.sleepingLeft, part.position.x+20, part.position.y);
+                                }
+                            } else if (Math.abs(part.velocity.y) > 1.15) {
                                 // document.getElementById("game-canvas").append(image)
                                 // console.log(part.name, part.velocity)
                                 const w = 50;
@@ -867,6 +893,12 @@ export default MyRender;
                                     w,          // dWidth
                                     h           // dHeight
                                 );
+                                if(part.powered && part.poweredLeft !== undefined) {
+                                    c.font = "24px Arial";
+                                    c.textAlign = "center";
+                                    c.fillStyle = "black"
+                                    c.fillText(part.poweredLeft, part.position.x+35, part.position.y);
+                                }
                             } else if (part.velocity.x > 0) {
                                 const w = 50;
                                 const h = 63;
@@ -885,6 +917,12 @@ export default MyRender;
                                     w,          // dWidth
                                     h           // dHeight
                                 );
+                                if(part.powered && part.poweredLeft !== undefined) {
+                                    c.font = "24px Arial";
+                                    c.textAlign = "center";
+                                    c.fillStyle = "black"
+                                    c.fillText(part.poweredLeft, part.position.x+35, part.position.y);
+                                }
                             } else if (part.velocity.x < 0) {
                                 // document.getElementById("game-canvas").append(image)
                                 const w = 50;
@@ -904,6 +942,12 @@ export default MyRender;
                                     w,          // dWidth
                                     h           // dHeight
                                 );
+                                if(part.powered && part.poweredLeft !== undefined) {
+                                    c.font = "24px Arial";
+                                    c.textAlign = "center";
+                                    c.fillStyle = "black"
+                                    c.fillText(part.poweredLeft, part.position.x+35, part.position.y);
+                                }
                             } else {
                                 // document.getElementById("game-canvas").append(image)
                                 const w = 50;
@@ -921,6 +965,12 @@ export default MyRender;
                                     w,          // dWidth
                                     h           // dHeight
                                 );
+                                if(part.powered && part.poweredLeft !== undefined) {
+                                    c.font = "24px Arial";
+                                    c.textAlign = "center";
+                                    c.fillStyle = "black"
+                                    c.fillText(part.poweredLeft, part.position.x+35, part.position.y);
+                                }
                             }
 
                             // c.fill();
