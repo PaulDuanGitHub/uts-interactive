@@ -850,6 +850,16 @@ export class MyComponent extends Component {
 						</div>
 					</Col>
 				</Row>
+				<Row style={{"textAlign":"center", "justifyContent":"start"}}>
+					<Col style={{"textAlign":"center", "justifyContent":"start"}}>
+						<h6 style={{"textAlign":"center"}}>1. Flags for checkpoint. If you fall, you can use reset button to respawn.</h6>
+						<h6>2. Getting the donut will let you jump higher for 10 seconds.</h6>
+						<h6>3. You can use the arrow keys/wasd to control your character.</h6>
+						<h6>4. There will be questions that they will need to answer to proceed the game, if you didn't get it right you will be put to sleep for 5 seconds</h6>
+						<h6>5. The goal is to get to the finish line</h6>
+						<h6>6. Good Luck Have Fun!</h6>
+					</Col>
+				</Row>
 			</div>
 		);
 	}

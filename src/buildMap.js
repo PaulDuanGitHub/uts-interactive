@@ -33,6 +33,12 @@ import mills from "./assets/map/mills.png"
 import control from "./assets/map/lobby/control.png"
 import MMAURL from "./assets/map/MMA.png"
 
+import first from "./assets/map/1st.png"
+import second from "./assets/map/2nd.png"
+import third from "./assets/map/3rd.png"
+import fourth from "./assets/map/4th.png"
+import fifth from "./assets/map/5th.png"
+
 var buildMap = {}
 buildMap.build = (composite, world) => {
     composite.add(world, [
@@ -74,11 +80,96 @@ buildMap.build = (composite, world) => {
             }
         }),
         buildMap.createQuestion(700, 590, "What is UTS's full name?\n\nPlease only enter a sigle number:\n1. University Technology Services\n2. University of Technology Sydney\n3. Unix Time Stamp", "1"),
+        Bodies.rectangle(900, 470, 314, 104, {
+            isStatic: true,
+            render: {
+                lineWidth: 1,
+                sprite: {
+                    texture: first,
+                    xOffset: 0,
+                    yOffset: 0,
+                    xScale: 1,
+                    yScale: 1
+                }
+            },
+            collisionFilter: {
+                category: 0x0002,
+                mask: 0x0001
+            }
+        }),
         // Questions
-        buildMap.createQuestion(2344, 340, "What is UTAG's full name?:\n1. University Technology Acrobatics Group\n2. University Technology Accountant Group\n3. University Technology Assisant Group", "3"),
+        buildMap.createQuestion(2344, 340, "What is UTAG's full name?\n1. University Technology Acrobatics Group\n2. University Technology Accountant Group\n3. University Technology Assistant Group", "3"),
+        Bodies.rectangle(2310, 220, 314, 104, {
+            isStatic: true,
+            render: {
+                lineWidth: 1,
+                sprite: {
+                    texture: second,
+                    xOffset: 0,
+                    yOffset: 0,
+                    xScale: 1,
+                    yScale: 1
+                }
+            },
+            collisionFilter: {
+                category: 0x0002,
+                mask: 0x0001
+            }
+        }),
         buildMap.createQuestion(6500, 430, "What is the human hearing range?\n1. 0 to 20,000Hz\n2. 20 to 20,000Hz\n3. 200 to 200,000Hz", "2"),
+        Bodies.rectangle(6500, 210, 314, 104, {
+            isStatic: true,
+            render: {
+                lineWidth: 1,
+                sprite: {
+                    texture: third,
+                    xOffset: 0,
+                    yOffset: 0,
+                    xScale: 1,
+                    yScale: 1
+                }
+            },
+            collisionFilter: {
+                category: 0x0002,
+                mask: 0x0001
+            }
+        }),
         buildMap.createQuestion(7200, 430, "What is the family of cactus?\n1. Dinosauria\n2. Caryophyllales\n3. Cactaceae", "3"),
-        buildMap.createQuestion(10160, 570, "What is the right order of UTS values\n1. Seamless Transformative Connected\n2. Connected Transformatvie Seamless\n3. Connected Seamless Transformative", "3"),
+        Bodies.rectangle(7200, 210, 314, 104, {
+            isStatic: true,
+            render: {
+                lineWidth: 1,
+                sprite: {
+                    texture: fourth,
+                    xOffset: 0,
+                    yOffset: 0,
+                    xScale: 1,
+                    yScale: 1
+                }
+            },
+            collisionFilter: {
+                category: 0x0002,
+                mask: 0x0001
+            }
+        }),
+        buildMap.createQuestion(10160, 570, "What is the right order of UTS values\n1. Seamless Transformative Connected\n2. Connected Transformative Seamless\n3. Connected Seamless Transformative", "3"),
+        Bodies.rectangle(10160, 460, 314, 104, {
+            isStatic: true,
+            render: {
+                lineWidth: 1,
+                sprite: {
+                    texture: fifth,
+                    xOffset: 0,
+                    yOffset: 0,
+                    xScale: 1,
+                    yScale: 1
+                }
+            },
+            collisionFilter: {
+                category: 0x0002,
+                mask: 0x0001
+            }
+        }),
         Bodies.rectangle(1850+451/2*0.5, 570-284/2*0.5, 451*0.5, 284*0.5, {
             isStatic:true,
             render:{
