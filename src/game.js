@@ -44,10 +44,9 @@ export class MyComponent extends Component {
 		gate: undefined,
 		// startTime:0,
 		// spawnPoint: { x: 10700, y: 300 } // Sheridan
-		spawnPoint: { x: 7630, y: 300 } // BSB
 		// spawnPoint: { x: 3500, y: 300 } // 248
 		// spawnPoint: { x: 5727, y: 530 } // Bee
-		// spawnPoint: { x: 600, y: 400 }
+		spawnPoint: { x: 600, y: 400 }
 		// springs: []
 	}
 
