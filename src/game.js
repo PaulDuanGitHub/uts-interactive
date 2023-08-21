@@ -180,7 +180,7 @@ export class MyComponent extends Component {
 			var new_other_player = this.state.other_player
 			console.log(data);
 			Object.keys(data['users']).forEach((player) => {
-				if (!bodiesUUID.includes(player)) {
+				if (!bodiesUUID.includes(player) && data['users'][player].name != undefined) {
 					console.log("------", data['users'][player]);
 					let boxD = this.Bodies.rectangle(this.state.spawnPoint.x, this.state.spawnPoint.y, 25, 63, {
 						inertia: Infinity, isStatic: true,

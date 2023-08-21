@@ -978,7 +978,7 @@ export default MyRender;
                                 c.font = "24px Arial";
                                 c.fillStyle = "blue"
                                 c.textAlign = "center";
-                                c.fillText(part.name + ~~part.position.x + " " + ~~part.position.y, part.position.x, part.position.y - 40);
+                                c.fillText(part.name, part.position.x, part.position.y - 40);
                             } 
                             // c.setTransform(1, 0, 0, 1, 0, 0);
                         } else {
