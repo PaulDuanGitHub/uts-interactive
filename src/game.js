@@ -165,7 +165,7 @@ export class MyComponent extends Component {
 		this.state.socket.on("update", (data) => {
 
 			if (data.gameStarted) {
-				Matter.World.remove(this.engine.world, this.state.gate)
+				// Matter.World.remove(this.engine.world, this.state.gate)
 			}
 
 			var bodies = this.Composite.allBodies(this.engine.world)
@@ -236,7 +236,7 @@ export class MyComponent extends Component {
 
 		this.state.socket.on("gameStart", () => {
 			// alert("gameStart")
-			Matter.World.remove(this.engine.world, this.state.gate)
+			// Matter.World.remove(this.engine.world, this.state.gate)
 		})
 		this.state.socket.on("updateRanking", (data) => {
 			// alert('')
@@ -397,8 +397,8 @@ export class MyComponent extends Component {
 
 		// 6. 将所有物体添加到世界中
 		// this.Composite.add(this.engine.world, [boxA, boxB, ground, ground2])
-		var gate = this.Bodies.rectangle(1200, 550, 20, 20, { isStatic: true, render: { fillStyle: "blue" } })
-		this.setState({ gate: gate })
+		// var gate = this.Bodies.rectangle(1200, 550, 20, 20, { isStatic: true, render: { fillStyle: "blue" } })
+		// this.setState({ gate: gate })
 		this.Composite.add(this.engine.world, [
 			// walls
 			this.Bodies.rectangle(600, 10, 1220, 20, { isStatic: true }),
@@ -406,7 +406,7 @@ export class MyComponent extends Component {
 			this.Bodies.rectangle(1200, 250, 20, 500, { isStatic: true }),
 			this.Bodies.rectangle(0, 300, 20, 600, { isStatic: true }),
 
-			gate,//gate
+			// gate,//gate
 
 			this.createPlatform(900, 550, 40),
 			this.createPlatform(1170, 425, 40),
@@ -512,7 +512,7 @@ export class MyComponent extends Component {
 		// 9. 运行渲染器
 		this.Runner.run(runner, this.engine)
 		this.state.socket.emit("joinRoom", { name: name, uuid: v4() })
-		Matter.World.remove(this.engine.world, this.state.gate)
+		// Matter.World.remove(this.engine.world, this.state.gate)
 	}
 
 	registerMatterEventListener = () => {
