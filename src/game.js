@@ -512,6 +512,7 @@ export class MyComponent extends Component {
 		// 9. 运行渲染器
 		this.Runner.run(runner, this.engine)
 		this.state.socket.emit("joinRoom", { name: name, uuid: v4() })
+		Matter.World.remove(this.engine.world, this.state.gate)
 	}
 
 	registerMatterEventListener = () => {
@@ -794,7 +795,6 @@ export class MyComponent extends Component {
 	componentDidMount = () => {
 		// this.nameInput.current.value = "Paul"
 		// this.joinGame()
-		Matter.World.remove(this.engine.world, this.state.gate)
 		this.timerInterval = setInterval(() => {
 			if (this.state.startTime != undefined) {
 				const d = new Date(Date.UTC(0, 0, 0, 0, 0, 0, Date.now() - this.state.startTime))
