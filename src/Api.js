@@ -7,5 +7,6 @@ if (window.location.origin == "http://127.0.0.1:3000" || window.location.origin 
     url = "https://api.paulduan.tk/uts-interactive"
     isSocket = true
 }
+// isSocket = true
 
 export {url, isSocket};
