@@ -37,7 +37,7 @@ export class MyComponent extends Component {
 		onGround: true,
 		joined: false,
 		socket: io(
-			isSocket ? "https://api.paulduan.tk/" : "http://127.0.0.1:8888/", 
+			isSocket ? "https://api.xianzhaoduan.com/" : "http://127.0.0.1:8888/", 
 			isSocket ? { path: '/uts-interactive/socket.io', withCredentials:true,transports: ['websocket'] } : {withCredentials:true}),
 		player: Matter.Bodies.rectangle(200, 200, 80, 80, { inertia: Infinity }),
 		other_player: {},
